@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ranj / ASCII studies</title>
+  <style>
+    :root { color-scheme: dark; --bg: #0a0d12; --text: #edf0f4; --muted: #9ba6b4; --line: #28303c; --control: #151b24; --accent: #b8c8e1; }
+    :root[data-theme="light"] { color-scheme: light; --bg: #f5f5f2; --text: #242a32; --muted: #596575; --line: #d7dde2; --control: #fff; --accent: #345477; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    main { max-width: 1512px; margin: 0 auto; padding: 46px 48px 50px; }
+    header { display: flex; justify-content: space-between; gap: 32px; align-items: flex-end; padding-bottom: 30px; border-bottom: 1px solid var(--line); }
+    .eyebrow, .num, .small { font: 11px/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 1.7px; text-transform: uppercase; }
+    .eyebrow { color: var(--accent); margin: 0 0 12px; }
+    h1 { font-size: clamp(30px, 4vw, 46px); font-weight: 500; letter-spacing: -1.6px; margin: 0 0 12px; }
+    .intro { color: var(--muted); font-size: 15px; line-height: 1.65; max-width: 690px; margin: 0; }
+    .theme-group { display: flex; gap: 5px; align-self: flex-start; white-space: nowrap; }
+    button, select { background: var(--control); color: var(--text); border: 1px solid var(--line); padding: 9px 14px; font: inherit; font-size: 13px; border-radius: 5px; cursor: pointer; }
+    button:hover, select:hover { border-color: var(--muted); }
+    button[aria-pressed="true"] { color: var(--bg); background: var(--text); border-color: var(--text); }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin: 24px 0 30px; }
+    .concepts { display: flex; gap: 6px; flex-wrap: wrap; }
+    .concepts button { font-size: 12px; }
+    .size { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 30px 26px; }
+    .gallery.single { display: block; }
+    .study { margin: 0; min-width: 0; }
+    .study[hidden] { display: none; }
+    .image-wrap { width: 100%; max-width: 1120px; margin: 0 auto; }
+    .image-wrap img { width: 100%; height: auto; display: block; }
+    .gallery.single .image-wrap[data-size="github"] { max-width: 850px; }
+    .gallery.single .image-wrap[data-size="mobile"] { max-width: 390px; }
+    figcaption { margin-top: 16px; }
+    .gallery.single figcaption { max-width: 1120px; margin: 22px auto 0; }
+    .caption-top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+    h2 { display: inline; font-size: 17px; font-weight: 500; letter-spacing: -.2px; margin: 0; }
+    .num { margin-right: 12px; color: var(--muted); }
+    .description { font-size: 13px; color: var(--muted); line-height: 1.6; margin: 8px 0 0; }
+    .links { display: flex; gap: 14px; font-size: 11px; white-space: nowrap; }
+    a { color: var(--accent); text-decoration: none; text-underline-offset: 3px; }
+    a:hover { text-decoration: underline; }
+    details { margin-top: 14px; color: var(--muted); font-size: 12px; }
+    summary { cursor: pointer; width: fit-content; }
+    pre { border: 1px solid var(--line); background: var(--control); padding: 16px; line-height: 1.6; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--text); }
+    .embed-actions { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+    .copy-status { min-height: 16px; }
+    .playback { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 16px; }
+    .playback p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .playback button { min-height: 40px; }
+    footer { border-top: 1px solid var(--line); margin-top: 40px; padding-top: 22px; display: flex; gap: 25px; justify-content: space-between; color: var(--muted); font-size: 12px; line-height: 1.7; }
+    footer p { margin: 0; }
+    @media (max-width: 1050px) { .toolbar { align-items: flex-start; flex-direction: column; } }
+    @media (max-width: 760px) { main { padding: 28px 18px; } header { align-items: flex-start; flex-direction: column; gap: 20px; } .gallery { grid-template-columns: 1fr; } .caption-top { flex-wrap: wrap; gap: 9px; } footer { flex-direction: column; gap: 12px; } }
+    @media print { header, .toolbar, footer, details, .links { display: none; } main { padding: 0; } .study { break-inside: avoid; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <p class="eyebrow">Ranj101 / Profile exploration</p>
+        <h1>A little geometry. A little personality.</h1>
+        <p class="intro">ASCII studies for your GitHub profile. Watch the shapes rotate, the terrain ripple, and the characters reconstruct into a new form. Your selected tagline and stack appear in every design.</p>
+      </div>
+      <div class="theme-group" role="group" aria-label="Color theme">
+        <button type="button" data-theme="dark" aria-pressed="true">Dark</button>
+        <button type="button" data-theme="light" aria-pressed="false">Light</button>
+      </div>
+    </header>
+    <div class="toolbar">
+      <nav class="concepts" aria-label="Choose a concept">
+        <button type="button" data-concept="all" aria-pressed="true">Compare all</button>
+      </nav>
+      <label class="size">Preview width
+        <select id="size" aria-label="Preview width">
+          <option value="full">Full width</option>
+          <option value="github">GitHub · 850 px</option>
+          <option value="mobile">Mobile · 390 px</option>
+        </select>
+      </label>
+    </div>
+    <section id="gallery" class="gallery" aria-label="ASCII profile concepts"></section>
+    <footer>
+      <p>Original geometric artwork, generated from characters.<br>Inspired by <a href="https://github.com/Andrew6rant/Andrew6rant">Andrew6rant’s SVG profile technique</a>.</p>
+      <p>Choose the shape first. The name, details, and statistics are editable.<br><a href="README.md">Setup and source notes</a> · <a href="profile.json">Profile data</a></p>
+    </footer>
+  </main>
+  <script>
+    const concepts = __CONCEPT_DATA__;
+    const motion = __MOTION_DATA__;
+    const gallery = document.querySelector('#gallery');
+    const nav = document.querySelector('.concepts');
+    const size = document.querySelector('#size');
+    let selected = motion && location.hash === '#motion' ? 'motion' : 'all';
+    let theme = 'dark';
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    let playing = false;
+    document.querySelector('.eyebrow').textContent += ` / 01—${String(concepts.length).padStart(2, '0')}`;
+
+    function wireCopy(figure, embed) {
+      figure.querySelector('pre').textContent = embed;
+      figure.querySelector('.copy').addEventListener('click', async () => {
+        const status = figure.querySelector('.copy-status');
+        try {
+          await navigator.clipboard.writeText(embed);
+          status.textContent = 'Copied';
+        } catch {
+          status.textContent = 'Select and copy the embed above.';
+        }
+      });
+    }
+
+    if (motion) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.concept = 'motion';
+      button.setAttribute('aria-pressed', 'false');
+      button.textContent = 'Animation';
+      nav.append(button);
+      const figure = document.createElement('figure');
+      figure.className = 'study';
+      figure.dataset.concept = 'motion';
+      figure.innerHTML = `
+        <div class="image-wrap" data-size="full"><img width="1120" height="600" alt="ASCII shapes rotate, terrain waves ripple, and characters reconstruct beside Ranj Rashid's stationary profile."></div>
+        <figcaption>
+          <div class="caption-top"><div><span class="num"></span><h2>Geometry in motion</h2></div>
+            <div class="links"><a class="gif-link" target="_blank" rel="noopener">Open GIF ↗</a><a href="assets/motion-contact-sheet.jpg" target="_blank" rel="noopener">Transition stills ↗</a></div>
+          </div>
+          <p class="description"></p>
+          <div class="playback"><button type="button" class="play" aria-pressed="false">Play animation</button><p class="playback-note" role="status"></p></div>
+          <details><summary>README embed · includes reduced-motion stills</summary><pre></pre>
+            <div class="embed-actions"><button type="button" class="copy">Copy embed</button><span class="copy-status" role="status"></span></div>
+          </details>
+        </figcaption>`;
+      wireCopy(figure, motion.embed);
+      figure.querySelector('.num').textContent = `01—${String(motion.shapes.length).padStart(2, '0')}`;
+      figure.querySelector('.play').addEventListener('click', () => {
+        playing = !playing;
+        update();
+      });
+      gallery.append(figure);
+    }
+
+    for (const concept of concepts) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.concept = concept.key;
+      button.setAttribute('aria-pressed', 'false');
+      button.textContent = `${concept.key.slice(0, 2)} ${concept.name}`;
+      nav.append(button);
+
+      const figure = document.createElement('figure');
+      figure.className = 'study';
+      figure.dataset.concept = concept.key;
+      figure.innerHTML = `
+        <div class="image-wrap" data-size="full"><img width="1120" height="600"></div>
+        <figcaption>
+          <div class="caption-top"><div><span class="num"></span><h2></h2></div>
+            <div class="links"><a class="svg-link" target="_blank" rel="noopener">Open SVG ↗</a><a class="ascii-link" target="_blank" rel="noopener">ASCII text ↗</a></div>
+          </div>
+          <p class="description"></p>
+          <details><summary>README embed</summary><pre></pre>
+            <div class="embed-actions"><button type="button" class="copy">Copy embed</button><span class="copy-status" role="status"></span></div>
+          </details>
+        </figcaption>`;
+      figure.querySelector('img').alt = `${concept.name}. ASCII art beside Ranj Rashid's profile.`;
+      figure.querySelector('.num').textContent = concept.key.slice(0, 2);
+      figure.querySelector('h2').textContent = concept.name;
+      figure.querySelector('.description').textContent = concept.description;
+      figure.querySelector('.ascii-link').href = `assets/${concept.key}.txt`;
+      wireCopy(figure, concept.embed);
+      gallery.append(figure);
+    }
+
+    function update() {
+      document.documentElement.dataset.theme = theme;
+      gallery.classList.toggle('single', selected !== 'all');
+      for (const figure of gallery.querySelectorAll('.study')) {
+        const key = figure.dataset.concept;
+        figure.hidden = key === 'motion' ? selected !== 'motion' : selected !== 'all' && selected !== key;
+        let source = `assets/${key}-${theme}.svg`;
+        if (key === 'motion') {
+          source = `assets/motion-${theme}${playing && !figure.hidden ? '.gif' : '-poster.png'}`;
+          figure.querySelector('.gif-link').href = `assets/motion-${theme}.gif`;
+          const mib = (motion.themes[theme].bytes / 1024 / 1024).toFixed(1);
+          figure.querySelector('.description').textContent = `${motion.shapes.length} shapes · ${motion.hold_frames / motion.fps}s motion + ${motion.transition_frames / motion.fps}s transition each · ${motion.duration_ms / 1000}-second loop · ${motion.fps} fps · ${motion.width} × ${motion.height} · ${mib} MiB.`;
+          figure.querySelector('.play').textContent = playing ? 'Stop animation' : 'Play animation';
+          figure.querySelector('.play').setAttribute('aria-pressed', String(playing));
+          figure.querySelector('.playback-note').textContent = playing ? 'Playing. Stop returns to a still image.' : reducedMotion.matches ? 'Reduced motion is on. The preview stays still unless you press Play.' : 'Still preview. Play starts the loop; Stop returns here.';
+        } else {
+          figure.querySelector('.svg-link').href = source;
+        }
+        if (figure.querySelector('img').getAttribute('src') !== source) figure.querySelector('img').src = source;
+        figure.querySelector('.image-wrap').dataset.size = size.value;
+      }
+      for (const button of nav.querySelectorAll('button')) button.setAttribute('aria-pressed', String(button.dataset.concept === selected));
+      for (const button of document.querySelectorAll('button[data-theme]')) button.setAttribute('aria-pressed', String(button.dataset.theme === theme));
+    }
+
+    nav.addEventListener('click', event => {
+      const button = event.target.closest('button[data-concept]');
+      if (!button) return;
+      selected = button.dataset.concept;
+      playing = false;
+      update();
+    });
+    for (const button of document.querySelectorAll('button[data-theme]')) button.addEventListener('click', () => {
+      theme = button.dataset.theme;
+      update();
+    });
+    size.addEventListener('change', () => {
+      if (selected === 'all') selected = concepts[0].key;
+      update();
+    });
+    reducedMotion.addEventListener('change', () => {
+      if (reducedMotion.matches) playing = false;
+      update();
+    });
+    update();
+  </script>
+</body>
+</html>

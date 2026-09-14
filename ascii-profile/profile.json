@@ -1,0 +1,42 @@
+{
+  "name": "Ranj Rashid",
+  "handle": "Ranj101",
+  "tagline": "Building dependable software for public services.",
+  "fields": [
+    {
+      "label": "role",
+      "value": "Software Engineer"
+    },
+    {
+      "label": "location",
+      "value": "Erbil, Iraq"
+    },
+    {
+      "label": "stack",
+      "value": "C# · Rust · .NET · PostgreSQL"
+    },
+    {
+      "label": "building",
+      "value": "KRG Projects"
+    },
+    {
+      "label": "website",
+      "value": "linkedin.com/in/ranjrashid"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "public repos",
+      "value": "5"
+    },
+    {
+      "label": "stars received",
+      "value": "1"
+    },
+    {
+      "label": "followers",
+      "value": "26"
+    }
+  ],
+  "note": "Public GitHub statistics only."
+}
