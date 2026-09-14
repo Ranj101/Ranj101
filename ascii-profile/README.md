@@ -1,6 +1,18 @@
 # ASCII profile studies
 
-The profile stacks a centered ASCII animation above a separate SVG information card. The card restores the original monospace typography, aligned fields, and accent-colored statistics. Clicking it opens LinkedIn. Each detail appears once, and statistics can update without rebuilding the GIF. Eight earlier SVG card studies remain in the local gallery.
+The profile stacks a centered ASCII animation above the Terminal manifest SVG card. The card uses character-drawn borders, a command prompt, aligned fields, and bracketed statistics. Clicking it opens LinkedIn. Each detail appears once, and statistics can update without rebuilding the GIF. Eight earlier SVG card studies remain in the local gallery.
+
+## Compare information-card designs
+
+Open [card-studies.html](card-studies.html) to compare the selected Terminal manifest card with two alternatives, Glyph signature and Source file. Each has a light and dark SVG. Select a design to preview it below the existing geometry, switch to the 390-pixel card width, or play the animation. Playback starts only when you select **Play geometry**. The information cards stay still.
+
+The comparison gallery uses the same Terminal manifest renderer as the published profile. All three designs read the public information from `profile.json`, and each card links to LinkedIn. The character-built name in Glyph signature uses a small glyph alphabet for the current name; other names fall back to normal monospace text. To refresh the comparison gallery after changing the profile, run:
+
+```sh
+python3 ascii-profile/card_studies.py
+```
+
+This command writes only `card-studies.html` and `assets/card-studies/`. It does not change the README, production information card, or animation. Edit `information_svg` in `generate.py` for Terminal manifest, `card_studies.py` for the alternatives, and `card-studies.template.html` for the comparison page. Regenerate the assets after editing their source.
 
 ## Review the concepts
 
@@ -36,6 +48,7 @@ To refresh the counts and information cards locally, use Python 3.12 with the te
 ```sh
 python3 ascii-profile/update_stats.py
 python3 ascii-profile/generate.py --readme README.md
+python3 ascii-profile/card_studies.py
 python3 -m unittest discover -s ascii-profile -p 'test_*.py'
 ```
 
@@ -49,7 +62,7 @@ The workflow in [update-profile-stats.yml](../.github/workflows/update-profile-s
 - After pushes that change the profile configuration, renderer, updater, gallery template, dependency file, or workflow.
 - When you select **Actions → Update public profile statistics → Run workflow**.
 
-After fetching changed statistics, the workflow refreshes the information card, README, earlier SVG studies, and gallery. Scheduled runs do not rebuild the GIFs because personal information is separate from the animation. Scheduled runs with unchanged counts do not rewrite the generated files. Pushes and manual runs also rebuild both animation themes and their posters. The workflow runs the tests before committing the changed profile data, generated README section, and assets. It never force-pushes. A concurrent push can cause its final push to fail safely; rerun the workflow against the latest `main`.
+After fetching changed statistics, the workflow refreshes the Terminal manifest card, README, alternative card designs, earlier SVG studies, and both galleries. Scheduled runs do not rebuild the GIFs because personal information is separate from the animation. Scheduled runs with unchanged counts do not rewrite the generated files. Pushes and manual runs also rebuild both animation themes and their posters. The workflow runs the tests before committing the changed profile data, generated README section, and assets. It never force-pushes. A concurrent push can cause its final push to fail safely; rerun the workflow against the latest `main`.
 
 No personal access token or custom secret is required. Public data is fetched anonymously. The workflow uses its repository-scoped `GITHUB_TOKEN` only for checkout and the generated-file commit. Its job requests `contents: write`; repository rules must allow that bot commit to `main`. It uses a macOS runner for the same Menlo font as the reviewed preview and pins Pillow to the tested version. No font file is redistributed.
 
@@ -61,7 +74,7 @@ Select **Play animation** in the gallery. The preview starts still; **Stop anima
 
 The animation has an 840 × 588 source canvas and displays at 600 × 420 pixels in the desktop README. The shallower stage gives the information card more space in the first screenful. Glyph spacing is about 13% smaller than the preceding version, and the character grid is centered using the font's advance and ink bounds. It scales down further on narrower screens without distortion.
 
-All personal information sits below the geometry in one 600 × 474 SVG card. It uses the original SFMono-Regular, Consolas, Liberation Mono, Menlo, and monospace font stack. The animation caption, header, and field labels share a 32-pixel inset. Statistics sit in three equal-width, centered columns, with the public-data note centered beneath them. The website is underlined, and the entire card links to LinkedIn through an HTML anchor around its themed `<picture>`. Individual regions of an embedded image are not separate links. The source configuration stores the full HTTPS address in the website field's `href`. The image's alternative text includes the personal details, current counts, and link destination. No external font or image is loaded by the SVG.
+All personal information sits below the geometry in one 600 × 480 Terminal manifest SVG card. It keeps the SFMono-Regular, Consolas, Liberation Mono, Menlo, and monospace font stack. Box-drawing characters frame the card. Its prompt, field labels, and first statistic start at a 40-pixel inset. Values align after `::` separators, and the three bracketed counts start 180 pixels apart. The public-data note sits beneath the counts. The website is underlined, and the entire card links to LinkedIn through an HTML anchor around its themed `<picture>`. Individual regions of an embedded image are not separate links. The source configuration stores the full HTTPS address in the website field's `href`. The image's alternative text includes the personal details, current counts, and link destination. No external font or image is loaded by the SVG.
 
 The loop lasts 40 seconds at a 20 fps render cadence. Each shape moves for 3 seconds and reconstructs over the next 2 seconds. Cube, crystal, column, and lattice rotate around Y; the torus and chain around X; and the orbital sphere around Z. The crystal and column turn in the opposite direction. Rotation speed is independent of the phase duration. The previous slow pace is preserved, with approximately 15–21 degrees of travel during each shorter phase.
 
@@ -79,6 +92,7 @@ To regenerate, install the animation dependency in your Python environment and r
 python3 -m pip install -r ascii-profile/requirements-animation.txt
 python3 ascii-profile/animate.py
 python3 ascii-profile/generate.py --readme README.md
+python3 ascii-profile/card_studies.py
 python3 -m unittest discover -s ascii-profile -p 'test_*.py'
 ```
 
@@ -98,10 +112,11 @@ The gallery can stop the animation by switching to its poster. A standalone GIF 
 
 ## Edit and regenerate
 
-Edit `profile.json`, then run this command from the repository root with Python 3.9 or later:
+Edit `profile.json`, then run these commands from the repository root with Python 3.9 or later:
 
 ```sh
 python3 ascii-profile/generate.py --readme README.md
+python3 ascii-profile/card_studies.py
 ```
 
 The generator writes both information-card themes, plus two SVG themes, a plain ASCII file, and a README embed for each earlier concept in `assets/`. It also rebuilds `index.html` from `gallery.template.html`. Edit the template, not the generated gallery. The optional `--readme` path updates the linked profile card and animation section between `PROFILE:START` and `PROFILE:END` comments. Put handwritten additions outside those markers. Missing, repeated, or reversed markers stop the README update without replacing its content.
@@ -141,4 +156,4 @@ This prototype independently implements the same general text-in-SVG technique. 
 
 One profile data file supplies the information cards, accessible README embed, and gallery. A small `Concept` record owns each shape's distance function, orientation, and colors. `Painter` owns only the geometry image. It has no access to personal information or statistics.
 
-The vertical layout keeps the geometry and information from competing for horizontal space. `PROFILE_WIDTH` and `PROFILE_INSET` in `generate.py` supply the shared display width and alignment edges for both renderers. The separate SVG preserves the earlier panel's typography. The card remains clickable, profile text appears once, and count-only updates leave the GIF files unchanged.
+The vertical layout keeps the geometry and information from competing for horizontal space. `PROFILE_WIDTH` in `generate.py` supplies the shared display width. `PROFILE_INSET` keeps the animation caption at 32 pixels; the card uses a 40-pixel content inset to leave room for its character-drawn frame. The production card and its gallery example share `information_svg`, so statistics updates preserve the selected design. The card remains clickable, profile text appears once, and count-only updates leave the GIF files unchanged.

@@ -51,21 +51,21 @@ class ReadmeTests(unittest.TestCase):
     def setUp(self):
         self.profile = json.loads((ROOT / "profile.json").read_text())
 
-    def test_profile_has_shared_insets_and_balanced_metric_columns(self):
+    def test_terminal_profile_has_aligned_fields_and_even_metric_columns(self):
         svg = ElementTree.fromstring(information_svg(self.profile, "dark"))
         labels = svg.findall("svg:text", SVG)
         for field in self.profile["fields"]:
             label = next(node for node in labels if node.text == field["label"])
-            self.assertEqual(float(label.attrib["x"]), 32)
+            self.assertEqual(float(label.attrib["x"]), 40)
         metrics = [svg.find(f"svg:text[@id='metric-{index}']", SVG) for index in range(3)]
-        centers = [float(metric.attrib["x"]) for metric in metrics]
-        self.assertAlmostEqual(sum(centers) / 3, float(svg.attrib["width"]) / 2)
-        self.assertAlmostEqual(centers[1] - centers[0], centers[2] - centers[1])
+        positions = [float(metric.attrib["x"]) for metric in metrics]
+        self.assertEqual(positions, [40, 220, 400])
+        self.assertEqual(positions[1] - positions[0], positions[2] - positions[1])
         for metric, configuration in zip(metrics, self.profile["metrics"]):
             label = next(node for node in labels if node.text == configuration["label"])
             self.assertEqual(metric.attrib["x"], label.attrib["x"])
-            self.assertEqual(metric.attrib.get("text-anchor"), "middle")
-            self.assertEqual(label.attrib.get("text-anchor"), "middle")
+            self.assertEqual(metric.attrib.get("text-anchor", "start"), "start")
+            self.assertEqual(label.attrib.get("text-anchor", "start"), "start")
 
     def test_profile_card_is_themed_clickable_and_has_complete_alternative_text(self):
         document = ProfileHTML(profile_panel(self.profile))
@@ -85,30 +85,36 @@ class ReadmeTests(unittest.TestCase):
         self.assertEqual("".join(document.text).strip(), "")
         self.assertTrue(set(document.tags) <= {"p", "a", "picture", "source", "img"})
 
-    def test_svg_restores_original_typography_and_displays_each_detail_once(self):
+    def test_svg_uses_terminal_typography_and_displays_each_detail_once(self):
         for theme in ("dark", "light"):
             with self.subTest(theme=theme):
                 svg = ElementTree.fromstring(information_svg(self.profile, theme))
-                self.assertEqual(svg.attrib["viewBox"], "0 0 600 474")
+                self.assertEqual(svg.attrib["viewBox"], "0 0 600 480")
+                self.assertIn("Terminal manifest", svg.find("svg:title", SVG).text)
                 self.assertIn('"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace', svg.find("svg:style", SVG).text)
                 labels = svg.findall("svg:text", SVG)
                 text = [label.text for label in labels]
+                self.assertIn("> whoami", text)
+                self.assertIn("[ manifest ]", text)
+                self.assertEqual(text.count("::"), 5)
+                self.assertIn("┌" + "─" * 66 + "┐", text)
+                self.assertIn("└" + "─" * 66 + "┘", text)
                 expected = [self.profile["name"], self.profile["tagline"], self.profile["note"]]
                 expected += [field[key] for field in self.profile["fields"] for key in ("label", "value")]
                 expected += [metric["label"] for metric in self.profile["metrics"]]
                 for value in expected:
                     self.assertEqual(text.count(value), 1, value)
                 name = next(label for label in labels if label.text == self.profile["name"])
-                self.assertEqual(name.attrib["font-size"], "37.00")
+                self.assertEqual(name.attrib["font-size"], "34.00")
                 self.assertEqual(name.attrib["font-weight"], "600")
                 for index, field in enumerate(self.profile["fields"]):
                     value = next(label for label in labels if label.text == field["value"])
-                    self.assertEqual(value.attrib["x"], "152")
-                    self.assertEqual(value.attrib["y"], str(201 + index * 32))
+                    self.assertEqual(value.attrib["x"], "174")
+                    self.assertEqual(value.attrib["y"], str(208 + index * 30))
                     if field["label"] == "website":
                         self.assertEqual(value.attrib["text-decoration"], "underline")
                 for index, metric in enumerate(self.profile["metrics"]):
-                    self.assertEqual(svg.find(f"svg:text[@id='metric-{index}']", SVG).text, metric["value"])
+                    self.assertEqual(svg.find(f"svg:text[@id='metric-{index}']", SVG).text, f'[{metric["value"]}]')
                 self.assertTrue({node.tag.split("}")[-1] for node in svg.iter()} <= {"svg", "title", "desc", "style", "rect", "path", "text"})
 
     def test_personal_text_is_escaped_and_unsafe_links_are_rejected(self):
@@ -134,7 +140,7 @@ class ReadmeTests(unittest.TestCase):
                     changed["metrics"][index]["value"] = count
                     before = information_svg(self.profile, theme)
                     after = information_svg(changed, theme)
-                    expected = before.replace(f'id="metric-{index}">{metric["value"]}</text>', f'id="metric-{index}">{count}</text>')
+                    expected = before.replace(f'id="metric-{index}">[{metric["value"]}]</text>', f'id="metric-{index}">[{count}]</text>')
                     expected = expected.replace(f'{metric["label"]}: {metric["value"]}', f'{metric["label"]}: {count}')
                     self.assertNotEqual(before, after)
                     self.assertEqual(expected, after)
@@ -192,6 +198,7 @@ class ReadmeTests(unittest.TestCase):
             self.assertEqual("".join(document.text).strip(), "")
             for theme in ("dark", "light"):
                 self.assertEqual((assets / f"profile-{theme}.svg").read_text(), information_svg(self.profile, theme))
+                self.assertEqual((ROOT / "assets" / f"profile-{theme}.svg").read_text(), information_svg(self.profile, theme))
             for name, expected_hash in animation_hashes.items():
                 self.assertEqual(hashlib.sha256((assets / name).read_bytes()).hexdigest(), expected_hash)
 

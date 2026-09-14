@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="474" viewBox="0 0 600 474" role="img" aria-labelledby="title desc">
+<title id="title">Source file / Ranj Rashid</title>
+<desc id="desc">Ranj Rashid, @Ranj101. Building dependable software for public services. role: Software Engineer. location: Erbil, Iraq. stack: C# · Rust · .NET · PostgreSQL. building: KRG Projects. website: linkedin.com/in/ranjrashid. public repos: 5. stars received: 1. followers: 26. Public GitHub statistics only.</desc>
+<style>text{font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-variant-ligatures:none;font-variant-numeric:tabular-nums}</style>
+<rect width="600" height="474" fill="#ffffff"/>
+<text x="32" y="35" fill="#7151b8" font-size="14.00" font-weight="500" >profile.rs</text>
+<text x="568" y="35" fill="#596675" font-size="12.00" font-weight="400" text-anchor="end">@Ranj101</text>
+<text x="32" y="55" fill="#dce3e9" font-size="12.00" font-weight="400" aria-hidden="true" textLength="536" lengthAdjust="spacingAndGlyphs">────────────────────────────────────────────────────────────────</text>
+<text x="32" y="85" fill="#596675" font-size="12.00" font-weight="400" aria-hidden="true">01</text>
+<text x="72" y="85" fill="#7151b8" font-size="19.00" font-weight="500" >Profile {</text>
+<text x="32" y="113" fill="#596675" font-size="12.00" font-weight="400" aria-hidden="true">02</text>
+<text x="72" y="113" font-size="15" xml:space="preserve" ><tspan fill="#596675">  </tspan><tspan fill="#7151b8">name</tspan><tspan fill="#596675">: &quot;</tspan><tspan fill="#1f2937">Ranj Rashid</tspan><tspan fill="#596675">&quot;,</tspan></text>
+<text x="32" y="141" fill="#596675" font-size="12.00" font-weight="400" aria-hidden="true">03</text>
+<text x="72" y="141" font-size="15" xml:space="preserve" ><tspan fill="#596675">  </tspan><tspan fill="#7151b8">role</tspan><tspan fill="#596675">: &quot;</tspan><tspan fill="#1f2937">Software Engineer</tspan><tspan fill="#596675">&quot;,</tspan></text>
+<text x="32" y="169" fill="#596675" font-size="12.00" font-weight="400" aria-hidden="true">04</text>
+<text x="72" y="169" font-size="15" xml:space="preserve" ><tspan fill="#596675">  </tspan><tspan fill="#7151b8">location</tspan><tspan fill="#596675">: &quot;</tspan><tspan fill="#1f2937">Erbil, Iraq</tspan><tspan fill="#596675">&quot;,</tspan></text>
+<text x="32" y="197" fill="#596675" font-size="12.00" font-weight="400" aria-hidden="true">05</text>
+<text x="72" y="197" font-size="15" xml:space="preserve" ><tspan fill="#596675">  </tspan><tspan fill="#7151b8">stack</tspan><tspan fill="#596675">: &quot;</tspan><tspan fill="#1f2937">C# · Rust · .NET · PostgreSQL</tspan><tspan fill="#596675">&quot;,</tspan></text>
+<text x="32" y="225" fill="#596675" font-size="12.00" font-weight="400" aria-hidden="true">06</text>
+<text x="72" y="225" font-size="15" xml:space="preserve" ><tspan fill="#596675">  </tspan><tspan fill="#7151b8">building</tspan><tspan fill="#596675">: &quot;</tspan><tspan fill="#1f2937">KRG Projects</tspan><tspan fill="#596675">&quot;,</tspan></text>
+<text x="32" y="253" fill="#596675" font-size="12.00" font-weight="400" aria-hidden="true">07</text>
+<text x="72" y="253" font-size="15" xml:space="preserve" text-decoration="underline"><tspan fill="#596675">  </tspan><tspan fill="#7151b8">website</tspan><tspan fill="#596675">: &quot;</tspan><tspan fill="#1f2937">linkedin.com/in/ranjrashid</tspan><tspan fill="#596675">&quot;,</tspan></text>
+<text x="32" y="281" fill="#596675" font-size="12.00" font-weight="400" aria-hidden="true">08</text>
+<text x="72" y="281" fill="#7151b8" font-size="19.00" font-weight="500" >}</text>
+<text x="72" y="316" fill="#596675" font-size="14.00" font-weight="400" >// Building dependable software for public services.</text>
+<text x="32" y="361" fill="#dce3e9" font-size="12.00" font-weight="400" aria-hidden="true" textLength="536" lengthAdjust="spacingAndGlyphs">────────────────────────────────────────────────────────────────</text>
+<text x="32" y="397" fill="#7151b8" font-size="27.00" font-weight="500" >5</text>
+<text x="32" y="420" fill="#596675" font-size="12.00" font-weight="400" >public repos</text>
+<text x="216" y="397" fill="#7151b8" font-size="27.00" font-weight="500" >1</text>
+<text x="216" y="420" fill="#596675" font-size="12.00" font-weight="400" >stars received</text>
+<text x="400" y="397" fill="#7151b8" font-size="27.00" font-weight="500" >26</text>
+<text x="400" y="420" fill="#596675" font-size="12.00" font-weight="400" >followers</text>
+<text x="32" y="451" fill="#596675" font-size="11.00" font-weight="400" >Public GitHub statistics only.</text>
+<text x="568" y="451" fill="#7151b8" font-size="11.00" font-weight="400" text-anchor="end">LinkedIn ↗</text>
+</svg>

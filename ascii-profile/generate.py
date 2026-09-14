@@ -302,18 +302,17 @@ def information_svg(profile: dict, theme: str) -> str:
     muted = "#9da7b5" if dark else "#596675"
     line = "#28323e" if dark else "#dce3e9"
     accent = CONCEPTS[0].dark if dark else CONCEPTS[0].light
-    left, right = PROFILE_INSET, PROFILE_WIDTH - PROFILE_INSET
+    left, right = 40, PROFILE_WIDTH - 40
     content_width = right - left
     esc = html.escape
     parts = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{PROFILE_WIDTH}" height="474" '
-        f'viewBox="0 0 {PROFILE_WIDTH} 474" role="img" aria-labelledby="title desc">',
-        f'<title id="title">{esc(profile["name"])} / Profile</title>',
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{PROFILE_WIDTH}" height="480" '
+        f'viewBox="0 0 {PROFILE_WIDTH} 480" role="img" aria-labelledby="title desc">',
+        f'<title id="title">Terminal manifest / {esc(profile["name"])}</title>',
         f'<desc id="desc">{esc(profile_description(profile))}</desc>',
         '<style>text{font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;'
         'font-variant-ligatures:none;font-variant-numeric:tabular-nums}</style>',
-        f'<rect x="0.5" y="0.5" width="{PROFILE_WIDTH - 1}" height="473" rx="12" fill="{background}" stroke="{line}"/>',
-        f'<path d="M1 60H{PROFILE_WIDTH - 1}M{left} 350H{right}" stroke="{line}" fill="none"/>',
+        f'<rect width="{PROFILE_WIDTH}" height="480" fill="{background}"/>',
     ]
 
     def label(x, y, value, size=14, color=muted, weight=400, max_width=None, extra=""):
@@ -322,23 +321,32 @@ def information_svg(profile: dict, theme: str) -> str:
         parts.append(f'<text x="{x}" y="{y}" fill="{color}" font-size="{size:.2f}" '
                      f'font-weight="{weight}" {extra}>{esc(value)}</text>')
 
-    label(left, 37, f"{profile['handle'].lower()}@github", 14, text, max_width=370)
-    label(right, 37, "LINKEDIN ↗", 11, accent, extra='text-anchor="end"')
-    label(left, 90, "HELLO, I'M", 12, accent, extra='letter-spacing="2"')
-    label(left - 2, 129, profile["name"], 37, text, 600, content_width)
-    label(left, 158, profile["tagline"], 14, muted, max_width=content_width)
+    for y in range(36, 464, 14):
+        label(16, y, "│", 14, line, extra='aria-hidden="true"')
+        label(576, y, "│", 14, line, extra='aria-hidden="true"')
+    for y, first, last in ((22, "┌", "┐"), (464, "└", "┘")):
+        label(16, y, first + "─" * 66 + last, 14, line,
+              extra='aria-hidden="true" textLength="568" lengthAdjust="spacingAndGlyphs"')
+    for y in (177, 354):
+        label(left, y, "─" * 64, 12, line,
+              extra=f'aria-hidden="true" textLength="{content_width}" lengthAdjust="spacingAndGlyphs"')
+    label(left, 54, f"{profile['handle'].lower()}@profile", 13, accent)
+    label(right, 54, "[ manifest ]", 12, muted, extra='text-anchor="end"')
+    label(left, 86, "> whoami", 14, muted)
+    label(left - 2, 126, profile["name"], 34, text, 600, content_width)
+    label(left, 153, profile["tagline"], 14, muted, max_width=content_width)
     for i, field in enumerate(profile["fields"]):
-        y = 201 + i * 32
-        label(left, y, field["label"], 14, muted, max_width=88)
-        label(left + 96, y, ":", 14, muted)
-        website = field["label"] == "website"
-        label(left + 120, y, field["value"], 15, accent if website else text, max_width=content_width - 120,
-              extra='text-decoration="underline"' if website else "")
+        y = 208 + i * 30
+        label(left, y, field["label"], 14, muted)
+        label(143, y, "::", 14, accent)
+        label(174, y, field["value"], 16, text, max_width=374,
+              extra='text-decoration="underline"' if field["label"] == "website" else "")
     for i, metric in enumerate(profile["metrics"]):
-        x = left + (i + 0.5) * content_width / len(profile["metrics"])
-        label(x, 390, metric["value"], 26, accent, 500, 162, extra=f'text-anchor="middle" id="metric-{i}"')
-        label(x, 414, metric["label"], 11, muted, max_width=162, extra='text-anchor="middle"')
-    label(PROFILE_WIDTH / 2, 457, profile["note"], 10, muted, max_width=content_width, extra='text-anchor="middle"')
+        x = left + i * 180
+        label(x, 391, "[" + metric["value"] + "]", 23, accent, 500, 152, extra=f'id="metric-{i}"')
+        label(x, 414, metric["label"], 12, muted, max_width=152)
+    label(left, 443, profile["note"], 11, muted)
+    label(right, 443, "LinkedIn ↗", 11, accent, extra='text-anchor="end"')
     parts.append('</svg>')
     return "\n".join(parts) + "\n"
 

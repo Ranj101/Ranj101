@@ -11,6 +11,7 @@ on:
       - 'ascii-profile/profile.json'
       - 'ascii-profile/*.py'
       - 'ascii-profile/gallery.template.html'
+      - 'ascii-profile/card-studies.template.html'
       - 'ascii-profile/requirements-animation.txt'
 
 permissions:
@@ -70,7 +71,9 @@ jobs:
 
       - name: Refresh the profile card, README, and gallery
         if: steps.statistics.outputs.render == 'true'
-        run: python ascii-profile/generate.py --readme README.md
+        run: |
+          python ascii-profile/generate.py --readme README.md
+          python ascii-profile/card_studies.py
 
       - name: Verify the generated profile
         if: steps.statistics.outputs.render == 'true'
@@ -82,7 +85,7 @@ jobs:
         if: steps.statistics.outputs.render == 'true'
         shell: bash
         run: |
-          git add -- README.md ascii-profile/profile.json ascii-profile/assets ascii-profile/index.html
+          git add -- README.md ascii-profile/profile.json ascii-profile/assets ascii-profile/index.html ascii-profile/card-studies.html
           if git diff --cached --quiet; then
             exit 0
           fi
