@@ -24,30 +24,32 @@ ART_CENTER = (WIDTH / 2, (ART_BOUNDS[1] + ART_BOUNDS[3]) / 2)
 CAPTION_INSET = PROFILE_INSET * WIDTH / PROFILE_WIDTH
 GLYPH_FONT_SIZE = 16
 GLYPH_WIDTH, GLYPH_HEIGHT, GLYPH_BASELINE = 18, 30, 21
+DEFAULT_HOLD = 3.0
+DEFAULT_TRANSITION = 2.0
 
 
 @dataclass(frozen=True)
 class Rotation:
     axis: int
-    travel: float
+    radians_per_second: float
     label: str
 
 
 @dataclass(frozen=True)
 class Wave:
-    cycles: float
+    cycles_per_second: float
     label: str = "Traveling wave / fixed view"
 
 
 MOTIONS = {
-    "01-cube": Rotation(1, 0.70, "Y-axis rotation"),
-    "02-torus": Rotation(0, 0.62, "X-axis rotation"),
-    "03-orbit": Rotation(2, 0.65, "Z-axis rotation"),
-    "04-crystal": Rotation(1, -0.85, "Reverse Y-axis rotation"),
-    "05-terrain": Wave(2.0),
-    "06-twist": Rotation(1, -0.60, "Reverse Y-axis rotation"),
-    "07-chain": Rotation(0, 0.70, "X-axis rotation"),
-    "08-gyroid": Rotation(1, 0.65, "Y-axis rotation"),
+    "01-cube": Rotation(1, 0.70 / 7, "Y-axis rotation"),
+    "02-torus": Rotation(0, 0.62 / 7, "X-axis rotation"),
+    "03-orbit": Rotation(2, 0.65 / 7, "Z-axis rotation"),
+    "04-crystal": Rotation(1, -0.85 / 7, "Reverse Y-axis rotation"),
+    "05-terrain": Wave(2 / 7),
+    "06-twist": Rotation(1, -0.60 / 7, "Reverse Y-axis rotation"),
+    "07-chain": Rotation(0, 0.70 / 7, "X-axis rotation"),
+    "08-gyroid": Rotation(1, 0.65 / 7, "Y-axis rotation"),
 }
 
 THEMES = {
@@ -74,19 +76,19 @@ def mix(a: tuple, b: tuple, t: float) -> tuple:
     return tuple(round(x + (y - x) * t) for x, y in zip(a, b))
 
 
-def concept_at(index: int, progress: float):
+def concept_at(index: int, progress: float, hold: float = DEFAULT_HOLD):
     concept = CONCEPTS[index]
     motion = MOTIONS[concept.key]
     if isinstance(motion, Wave):
-        phase = (progress * motion.cycles % 1) * math.tau
+        phase = (progress * hold * motion.cycles_per_second % 1) * math.tau
         return replace(concept, distance=partial(terrain, phase=phase))
     rotation = list(concept.rotation)
-    rotation[motion.axis] += motion.travel * (smooth(progress) - 0.5)
+    rotation[motion.axis] += motion.radians_per_second * hold * (smooth(progress) - 0.5)
     return replace(concept, rotation=tuple(rotation))
 
 
-def shape_at(index: int, progress: float) -> list[Glyph]:
-    grid = render_ascii(concept_at(index, progress))
+def shape_at(index: int, progress: float, hold: float = DEFAULT_HOLD) -> list[Glyph]:
+    grid = render_ascii(concept_at(index, progress, hold))
     return [Glyph(34 + col * 7.3, 119 + row * 11.2, char, intensity)
             for row, cells in enumerate(grid)
             for col, (char, intensity) in enumerate(cells) if char != " "]
@@ -236,16 +238,17 @@ def animation_embed() -> str:
     )
 
 
-def generate(output: Path, font_path: str, fps=20, hold=7.0, transition=2.0):
+def generate(output: Path, font_path: str, fps=20, hold=DEFAULT_HOLD, transition=DEFAULT_TRANSITION):
     hold_frames, morph_frames = round(hold * fps), round(transition * fps)
     if min(hold_frames, morph_frames) < 2:
         raise ValueError("Hold and transition must each contain at least two frames.")
+    hold = hold_frames / fps
     output.mkdir(parents=True, exist_ok=True)
     painters = {theme: Painter(theme, font_path) for theme in THEMES}
     palettes = {theme: global_palette(theme) for theme in THEMES}
     frames = {theme: [] for theme in THEMES}
     samples = []
-    starts = [shape_at(i, 0) for i in range(len(CONCEPTS))]
+    starts = [shape_at(i, 0, hold) for i in range(len(CONCEPTS))]
 
     def append(particles, index, progress=None):
         for theme, painter in painters.items():
@@ -261,8 +264,8 @@ def generate(output: Path, font_path: str, fps=20, hold=7.0, transition=2.0):
     for index, concept in enumerate(CONCEPTS):
         print(f"Rendering {concept.name}: {MOTIONS[concept.key].label.lower()} and character reconstruction", flush=True)
         for frame in range(hold_frames):
-            append(shape_at(index, frame / (hold_frames - 1)), index)
-        pairs = particle_pairs(shape_at(index, 1), starts[(index + 1) % len(CONCEPTS)])
+            append(shape_at(index, frame / (hold_frames - 1), hold), index)
+        pairs = particle_pairs(shape_at(index, 1, hold), starts[(index + 1) % len(CONCEPTS)])
         for frame in range(morph_frames):
             progress = (frame + 1) / morph_frames
             append(morph(pairs, progress), index, progress)
@@ -278,9 +281,9 @@ def generate(output: Path, font_path: str, fps=20, hold=7.0, transition=2.0):
         motion = MOTIONS[concept.key]
         state = {"key": concept.key, "name": concept.name, "motion": motion.label}
         if isinstance(motion, Rotation):
-            state.update(kind="rotation", rotation_degrees=round(math.degrees(motion.travel), 1))
+            state.update(kind="rotation", rotation_degrees=round(math.degrees(motion.radians_per_second * hold), 1))
         else:
-            state.update(kind="wave", wave_cycles=motion.cycles)
+            state.update(kind="wave", wave_cycles=round(motion.cycles_per_second * hold, 4))
         manifest["shapes"].append(state)
     for theme, sequence in frames.items():
         target = output / f"motion-{theme}.gif"
@@ -322,7 +325,7 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=Path, default=ROOT / "assets")
     parser.add_argument("--font", type=Path)
     parser.add_argument("--fps", type=int, choices=(10, 20, 25), default=20)
-    parser.add_argument("--hold", type=float, default=7.0, help="Seconds of rotation per shape")
-    parser.add_argument("--transition", type=float, default=2.0, help="Seconds of particle motion per transition")
+    parser.add_argument("--hold", type=float, default=DEFAULT_HOLD, help="Seconds of motion per shape")
+    parser.add_argument("--transition", type=float, default=DEFAULT_TRANSITION, help="Seconds of particle motion per transition")
     args = parser.parse_args()
     generate(args.output, find_font(args.font), args.fps, args.hold, args.transition)

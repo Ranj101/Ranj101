@@ -2,11 +2,12 @@
 
 import json
 import hashlib
+import math
 import unittest
 
 from PIL import Image, ImageChops, ImageColor, ImageSequence
 
-from animate import ART_BOUNDS, CONCEPTS, HEIGHT, MOTIONS, ROOT, WIDTH, Glyph, Painter, Rotation, Wave, concept_at, find_font, global_palette, mix, morph, particle_pairs, shape_at, smooth
+from animate import ART_BOUNDS, CONCEPTS, DEFAULT_HOLD, DEFAULT_TRANSITION, HEIGHT, MOTIONS, ROOT, WIDTH, Glyph, Painter, Rotation, Wave, concept_at, find_font, global_palette, mix, morph, particle_pairs, shape_at, smooth
 from generate import COLS, PROFILE_INSET, PROFILE_WIDTH, ROWS, TERRAIN_AMPLITUDES, TERRAIN_BASE, TERRAIN_HALF_EXTENT, rotate, terrain, terrain_height
 
 
@@ -75,8 +76,42 @@ class AnimationTests(unittest.TestCase):
     def test_previous_rotation_speeds_are_preserved(self):
         expected = {"01-cube": 0.70, "02-torus": 0.62, "03-orbit": 0.65, "04-crystal": -0.85,
                     "06-twist": -0.60, "07-chain": 0.70, "08-gyroid": 0.65}
-        for key, travel in expected.items():
-            self.assertEqual(MOTIONS[key].travel, travel)
+        for index, concept in enumerate(CONCEPTS):
+            if concept.key not in expected:
+                continue
+            motion = MOTIONS[concept.key]
+            expected_speed = expected[concept.key] / 7
+            self.assertEqual(motion.radians_per_second, expected_speed)
+            for hold in (3, 7, 9):
+                with self.subTest(shape=concept.key, hold=hold):
+                    start = concept_at(index, 0, hold).rotation[motion.axis]
+                    end = concept_at(index, 1, hold).rotation[motion.axis]
+                    self.assertAlmostEqual((end - start) / hold, expected_speed)
+
+    def test_wave_speed_does_not_depend_on_phase_duration(self):
+        index = next(i for i, concept in enumerate(CONCEPTS) if concept.key == "05-terrain")
+        self.assertEqual(MOTIONS["05-terrain"].cycles_per_second, 2 / 7)
+        for seconds in (0.25, 1, 2.5):
+            short = concept_at(index, seconds / 3, 3)
+            long = concept_at(index, seconds / 7, 7)
+            for point in ((0.2, 0.1, 0.3), (-0.5, 0.2, 0.7)):
+                with self.subTest(seconds=seconds, point=point):
+                    self.assertAlmostEqual(short.distance(point), long.distance(point))
+
+    def test_exported_timeline_uses_shorter_shape_phases(self):
+        manifest = json.loads((ROOT / "assets" / "motion.json").read_text())
+        self.assertEqual(DEFAULT_HOLD, 3)
+        self.assertEqual(DEFAULT_TRANSITION, 2)
+        self.assertEqual(manifest["hold_frames"] / manifest["fps"], DEFAULT_HOLD)
+        self.assertEqual(manifest["transition_frames"] / manifest["fps"], DEFAULT_TRANSITION)
+        self.assertEqual(manifest["duration_ms"], 40000)
+        self.assertEqual(manifest["frames"], 800)
+        for state in manifest["shapes"]:
+            motion = MOTIONS[state["key"]]
+            if isinstance(motion, Rotation):
+                self.assertEqual(state["rotation_degrees"], round(math.degrees(motion.radians_per_second * DEFAULT_HOLD), 1))
+            else:
+                self.assertEqual(state["wave_cycles"], round(motion.cycles_per_second * DEFAULT_HOLD, 4))
 
     def test_terrain_deforms_without_rotating(self):
         index = next(i for i, concept in enumerate(CONCEPTS) if concept.key == "05-terrain")
@@ -85,7 +120,7 @@ class AnimationTests(unittest.TestCase):
             self.assertEqual(concept_at(index, progress).rotation, CONCEPTS[index].rotation)
         self.assertNotEqual(shape_at(index, 0), shape_at(index, 0.125))
         self.assertNotEqual(concept_at(index, 0).distance((0.2, 0.1, 0.3)), concept_at(index, 0.125).distance((0.2, 0.1, 0.3)))
-        self.assertEqual(shape_at(index, 0), shape_at(index, 1))
+        self.assertEqual(shape_at(index, 0, 7), shape_at(index, 1, 7))
 
     def test_terrain_crests_fit_fixed_view(self):
         concept = next(concept for concept in CONCEPTS if concept.key == "05-terrain")
@@ -172,6 +207,9 @@ class AnimationTests(unittest.TestCase):
         assets = ROOT / "assets"
         manifest = json.loads((assets / "motion.json").read_text())
         hold, transition, fps = (manifest[key] for key in ("hold_frames", "transition_frames", "fps"))
+        hold_seconds = hold / fps
+        starts = [shape_at(index, 0, hold_seconds) for index in range(len(CONCEPTS))]
+        ends = [shape_at(index, 1, hold_seconds) for index in range(len(CONCEPTS))]
         for theme in ("dark", "light"):
             painter, palette = Painter(theme, find_font(None)), global_palette(theme)
             samples = {}
@@ -181,10 +219,10 @@ class AnimationTests(unittest.TestCase):
                     progress = None
                     color = accent
                     if phase_frame < hold:
-                        particles = shape_at(index, phase_frame / (hold - 1))
+                        particles = shape_at(index, phase_frame / (hold - 1), hold_seconds)
                     else:
                         progress = (phase_frame - hold + 1) / transition
-                        pairs = particle_pairs(self.ends[index], self.starts[(index + 1) % len(CONCEPTS)])
+                        pairs = particle_pairs(ends[index], starts[(index + 1) % len(CONCEPTS)])
                         particles = morph(pairs, progress)
                         next_accent = ImageColor.getrgb(getattr(CONCEPTS[(index + 1) % len(CONCEPTS)], theme))
                         color = mix(accent, next_accent, smooth(progress))

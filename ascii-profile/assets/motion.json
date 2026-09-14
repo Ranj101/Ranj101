@@ -2,21 +2,21 @@
   "width": 840,
   "height": 588,
   "fps": 20,
-  "frames": 1440,
-  "duration_ms": 72000,
-  "hold_frames": 140,
+  "frames": 800,
+  "duration_ms": 40000,
+  "hold_frames": 60,
   "transition_frames": 40,
   "font": "Menlo.ttc",
   "themes": {
     "dark": {
       "file": "motion-dark.gif",
-      "bytes": 12438007,
-      "encoded_frames": 1367
+      "bytes": 10556036,
+      "encoded_frames": 777
     },
     "light": {
       "file": "motion-light.gif",
-      "bytes": 12592620,
-      "encoded_frames": 1370
+      "bytes": 10657279,
+      "encoded_frames": 774
     }
   },
   "shapes": [
@@ -25,56 +25,56 @@
       "name": "Isometric cube",
       "motion": "Y-axis rotation",
       "kind": "rotation",
-      "rotation_degrees": 40.1
+      "rotation_degrees": 17.2
     },
     {
       "key": "02-torus",
       "name": "Torus",
       "motion": "X-axis rotation",
       "kind": "rotation",
-      "rotation_degrees": 35.5
+      "rotation_degrees": 15.2
     },
     {
       "key": "03-orbit",
       "name": "Orbital sphere",
       "motion": "Z-axis rotation",
       "kind": "rotation",
-      "rotation_degrees": 37.2
+      "rotation_degrees": 16.0
     },
     {
       "key": "04-crystal",
       "name": "Faceted crystal",
       "motion": "Reverse Y-axis rotation",
       "kind": "rotation",
-      "rotation_degrees": -48.7
+      "rotation_degrees": -20.9
     },
     {
       "key": "05-terrain",
       "name": "Terrain wave",
       "motion": "Traveling wave / fixed view",
       "kind": "wave",
-      "wave_cycles": 2.0
+      "wave_cycles": 0.8571
     },
     {
       "key": "06-twist",
       "name": "Twisted column",
       "motion": "Reverse Y-axis rotation",
       "kind": "rotation",
-      "rotation_degrees": -34.4
+      "rotation_degrees": -14.7
     },
     {
       "key": "07-chain",
       "name": "Interlocking chain",
       "motion": "X-axis rotation",
       "kind": "rotation",
-      "rotation_degrees": 40.1
+      "rotation_degrees": 17.2
     },
     {
       "key": "08-gyroid",
       "name": "Gyroid lattice",
       "motion": "Y-axis rotation",
       "kind": "rotation",
-      "rotation_degrees": 37.2
+      "rotation_degrees": 16.0
     }
   ]
 }
