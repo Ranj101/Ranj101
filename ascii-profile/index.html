@@ -30,7 +30,13 @@
     .study[hidden] { display: none; }
     .image-wrap { width: 100%; max-width: 1120px; margin: 0 auto; }
     .image-wrap img { width: 100%; height: auto; display: block; }
-    .gallery.single .image-wrap[data-size="github"] { max-width: 850px; }
+    .readme-preview { max-width: 840px; background: #0d1117; color: #e6edf3; font-size: 16px; line-height: 1.5; }
+    .readme-preview > img { max-width: 600px; margin-inline: auto; }
+    :root[data-theme="light"] .readme-preview { background: #fff; color: #1f2937; }
+    .profile-panel { max-width: 600px; margin-inline: auto; padding-top: 16px; }
+    .profile-panel p { margin: 0; }
+    .profile-panel a { display: block; border-radius: 12px; }
+    .gallery.single .image-wrap[data-size="github"] { max-width: 830px; }
     .gallery.single .image-wrap[data-size="mobile"] { max-width: 390px; }
     figcaption { margin-top: 16px; }
     .gallery.single figcaption { max-width: 1120px; margin: 22px auto 0; }
@@ -62,7 +68,7 @@
       <div>
         <p class="eyebrow">Ranj101 / Profile exploration</p>
         <h1>A little geometry. A little personality.</h1>
-        <p class="intro">ASCII studies for your GitHub profile. Watch the shapes rotate, the terrain ripple, and the characters reconstruct into a new form. Your selected tagline and stack appear in every design.</p>
+        <p class="intro">A smaller animation above a separate SVG profile card. The original monospace typography, aligned details, and public statistics, with a clickable link to LinkedIn.</p>
       </div>
       <div class="theme-group" role="group" aria-label="Color theme">
         <button type="button" data-theme="dark" aria-pressed="true">Dark</button>
@@ -75,13 +81,22 @@
       </nav>
       <label class="size">Preview width
         <select id="size" aria-label="Preview width">
+          <option value="github">GitHub · 830 px</option>
           <option value="full">Full width</option>
-          <option value="github">GitHub · 850 px</option>
           <option value="mobile">Mobile · 390 px</option>
         </select>
       </label>
     </div>
     <section id="gallery" class="gallery" aria-label="ASCII profile concepts"></section>
+    <template id="profile-panel"><p align="center">
+<a href="https://www.linkedin.com/in/ranjrashid/">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/profile-dark.svg">
+  <img alt="Ranj Rashid, @Ranj101. Building dependable software for public services. role: Software Engineer. location: Erbil, Iraq. stack: C# · Rust · .NET · PostgreSQL. building: KRG Projects. website: linkedin.com/in/ranjrashid. public repos: 5. stars received: 1. followers: 26. Public GitHub statistics only. Open LinkedIn profile." src="assets/profile-light.svg" width="600">
+</picture>
+</a>
+</p>
+</template>
     <footer>
       <p>Original geometric artwork, generated from characters.<br>Inspired by <a href="https://github.com/Andrew6rant/Andrew6rant">Andrew6rant’s SVG profile technique</a>.</p>
       <p>Choose the shape first. The name, details, and statistics are editable.<br><a href="README.md">Setup and source notes</a> · <a href="profile.json">Profile data</a></p>
@@ -89,18 +104,18 @@
   </main>
   <script>
     const concepts = [{"key": "01-cube", "name": "Isometric cube", "description": "Sharp edges, quiet structure. A compact architectural study.", "accent": "#7dd3fc", "embed": "\u003cpicture>\n  \u003csource media=\"(prefers-color-scheme: dark)\" srcset=\"ascii-profile/assets/01-cube-dark.svg\">\n  \u003cimg alt=\"Ranj Rashid&#x27;s profile with Isometric cube ASCII art. Public GitHub statistics only.\" src=\"ascii-profile/assets/01-cube-light.svg\" width=\"100%\">\n\u003c/picture>\n"}, {"key": "02-torus", "name": "Torus", "description": "A continuous surface, drawn with light and character density.", "accent": "#f5bd6c", "embed": "\u003cpicture>\n  \u003csource media=\"(prefers-color-scheme: dark)\" srcset=\"ascii-profile/assets/02-torus-dark.svg\">\n  \u003cimg alt=\"Ranj Rashid&#x27;s profile with Torus ASCII art. Public GitHub statistics only.\" src=\"ascii-profile/assets/02-torus-light.svg\" width=\"100%\">\n\u003c/picture>\n"}, {"key": "03-orbit", "name": "Orbital sphere", "description": "A shaded globe with clean meridians, latitude bands, and two orbital rings.", "accent": "#8bd5b2", "embed": "\u003cpicture>\n  \u003csource media=\"(prefers-color-scheme: dark)\" srcset=\"ascii-profile/assets/03-orbit-dark.svg\">\n  \u003cimg alt=\"Ranj Rashid&#x27;s profile with Orbital sphere ASCII art. Public GitHub statistics only.\" src=\"ascii-profile/assets/03-orbit-light.svg\" width=\"100%\">\n\u003c/picture>\n"}, {"key": "04-crystal", "name": "Faceted crystal", "description": "An elongated octahedron. Angular, spare, and a little otherworldly.", "accent": "#c4b5fd", "embed": "\u003cpicture>\n  \u003csource media=\"(prefers-color-scheme: dark)\" srcset=\"ascii-profile/assets/04-crystal-dark.svg\">\n  \u003cimg alt=\"Ranj Rashid&#x27;s profile with Faceted crystal ASCII art. Public GitHub statistics only.\" src=\"ascii-profile/assets/04-crystal-light.svg\" width=\"100%\">\n\u003c/picture>\n"}, {"key": "05-terrain", "name": "Terrain wave", "description": "Small traveling ripples cross a compact, shaded terrain tile with visible depth.", "accent": "#f8a995", "embed": "\u003cpicture>\n  \u003csource media=\"(prefers-color-scheme: dark)\" srcset=\"ascii-profile/assets/05-terrain-dark.svg\">\n  \u003cimg alt=\"Ranj Rashid&#x27;s profile with Terrain wave ASCII art. Public GitHub statistics only.\" src=\"ascii-profile/assets/05-terrain-light.svg\" width=\"100%\">\n\u003c/picture>\n"}, {"key": "06-twist", "name": "Twisted column", "description": "A square column twisted into a continuous architectural ribbon.", "accent": "#94b6ff", "embed": "\u003cpicture>\n  \u003csource media=\"(prefers-color-scheme: dark)\" srcset=\"ascii-profile/assets/06-twist-dark.svg\">\n  \u003cimg alt=\"Ranj Rashid&#x27;s profile with Twisted column ASCII art. Public GitHub statistics only.\" src=\"ascii-profile/assets/06-twist-light.svg\" width=\"100%\">\n\u003c/picture>\n"}, {"key": "07-chain", "name": "Interlocking chain", "description": "Three rounded links, alternating through perpendicular planes.", "accent": "#d8df8b", "embed": "\u003cpicture>\n  \u003csource media=\"(prefers-color-scheme: dark)\" srcset=\"ascii-profile/assets/07-chain-dark.svg\">\n  \u003cimg alt=\"Ranj Rashid&#x27;s profile with Interlocking chain ASCII art. Public GitHub statistics only.\" src=\"ascii-profile/assets/07-chain-light.svg\" width=\"100%\">\n\u003c/picture>\n"}, {"key": "08-gyroid", "name": "Gyroid lattice", "description": "Curved channels and shaded walls inside a fine cubic guide frame.", "accent": "#f29ec6", "embed": "\u003cpicture>\n  \u003csource media=\"(prefers-color-scheme: dark)\" srcset=\"ascii-profile/assets/08-gyroid-dark.svg\">\n  \u003cimg alt=\"Ranj Rashid&#x27;s profile with Gyroid lattice ASCII art. Public GitHub statistics only.\" src=\"ascii-profile/assets/08-gyroid-light.svg\" width=\"100%\">\n\u003c/picture>\n"}];
-    const motion = {"width": 1120, "height": 600, "fps": 20, "frames": 1440, "duration_ms": 72000, "hold_frames": 140, "transition_frames": 40, "font": "Menlo.ttc", "themes": {"dark": {"file": "motion-dark.gif", "bytes": 8068225, "encoded_frames": 1366}, "light": {"file": "motion-light.gif", "bytes": 8083311, "encoded_frames": 1375}}, "shapes": [{"key": "01-cube", "name": "Isometric cube", "motion": "Y-axis rotation", "kind": "rotation", "rotation_degrees": 40.1}, {"key": "02-torus", "name": "Torus", "motion": "X-axis rotation", "kind": "rotation", "rotation_degrees": 35.5}, {"key": "03-orbit", "name": "Orbital sphere", "motion": "Z-axis rotation", "kind": "rotation", "rotation_degrees": 37.2}, {"key": "04-crystal", "name": "Faceted crystal", "motion": "Reverse Y-axis rotation", "kind": "rotation", "rotation_degrees": -48.7}, {"key": "05-terrain", "name": "Terrain wave", "motion": "Traveling wave / fixed view", "kind": "wave", "wave_cycles": 2.0}, {"key": "06-twist", "name": "Twisted column", "motion": "Reverse Y-axis rotation", "kind": "rotation", "rotation_degrees": -34.4}, {"key": "07-chain", "name": "Interlocking chain", "motion": "X-axis rotation", "kind": "rotation", "rotation_degrees": 40.1}, {"key": "08-gyroid", "name": "Gyroid lattice", "motion": "Y-axis rotation", "kind": "rotation", "rotation_degrees": 37.2}], "embed": "\u003cpicture>\n  \u003csource media=\"(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)\" srcset=\"ascii-profile/assets/motion-dark-poster.png\">\n  \u003csource media=\"(prefers-reduced-motion: reduce)\" srcset=\"ascii-profile/assets/motion-light-poster.png\">\n  \u003csource media=\"(prefers-color-scheme: dark)\" srcset=\"ascii-profile/assets/motion-dark.gif\">\n  \u003cimg alt=\"Ranj Rashid&#x27;s profile. 8 animated ASCII shapes reconstruct into one another. Public GitHub statistics only.\" src=\"ascii-profile/assets/motion-light.gif\" width=\"100%\">\n\u003c/picture>\n"};
+    const motion = {"width": 840, "height": 588, "fps": 20, "frames": 1440, "duration_ms": 72000, "hold_frames": 140, "transition_frames": 40, "font": "Menlo.ttc", "themes": {"dark": {"file": "motion-dark.gif", "bytes": 12438007, "encoded_frames": 1367}, "light": {"file": "motion-light.gif", "bytes": 12592620, "encoded_frames": 1370}}, "shapes": [{"key": "01-cube", "name": "Isometric cube", "motion": "Y-axis rotation", "kind": "rotation", "rotation_degrees": 40.1}, {"key": "02-torus", "name": "Torus", "motion": "X-axis rotation", "kind": "rotation", "rotation_degrees": 35.5}, {"key": "03-orbit", "name": "Orbital sphere", "motion": "Z-axis rotation", "kind": "rotation", "rotation_degrees": 37.2}, {"key": "04-crystal", "name": "Faceted crystal", "motion": "Reverse Y-axis rotation", "kind": "rotation", "rotation_degrees": -48.7}, {"key": "05-terrain", "name": "Terrain wave", "motion": "Traveling wave / fixed view", "kind": "wave", "wave_cycles": 2.0}, {"key": "06-twist", "name": "Twisted column", "motion": "Reverse Y-axis rotation", "kind": "rotation", "rotation_degrees": -34.4}, {"key": "07-chain", "name": "Interlocking chain", "motion": "X-axis rotation", "kind": "rotation", "rotation_degrees": 40.1}, {"key": "08-gyroid", "name": "Gyroid lattice", "motion": "Y-axis rotation", "kind": "rotation", "rotation_degrees": 37.2}], "embed": "\u003cp align=\"center\">\n\u003cpicture>\n  \u003csource media=\"(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)\" srcset=\"ascii-profile/assets/motion-dark-poster.png\">\n  \u003csource media=\"(prefers-reduced-motion: reduce)\" srcset=\"ascii-profile/assets/motion-light-poster.png\">\n  \u003csource media=\"(prefers-color-scheme: dark)\" srcset=\"ascii-profile/assets/motion-dark.gif\">\n  \u003cimg alt=\"8 ASCII geometries rotate, ripple, and reconstruct into one another.\" src=\"ascii-profile/assets/motion-light.gif\" width=\"600\">\n\u003c/picture>\n\u003c/p>\n\n\u003cp align=\"center\">\n\u003ca href=\"https://www.linkedin.com/in/ranjrashid/\">\n\u003cpicture>\n  \u003csource media=\"(prefers-color-scheme: dark)\" srcset=\"ascii-profile/assets/profile-dark.svg\">\n  \u003cimg alt=\"Ranj Rashid, @Ranj101. Building dependable software for public services. role: Software Engineer. location: Erbil, Iraq. stack: C# \u00b7 Rust \u00b7 .NET \u00b7 PostgreSQL. building: KRG Projects. website: linkedin.com/in/ranjrashid. public repos: 5. stars received: 1. followers: 26. Public GitHub statistics only. Open LinkedIn profile.\" src=\"ascii-profile/assets/profile-light.svg\" width=\"600\">\n\u003c/picture>\n\u003c/a>\n\u003c/p>\n"};
     const gallery = document.querySelector('#gallery');
     const nav = document.querySelector('.concepts');
     const size = document.querySelector('#size');
-    let selected = motion && location.hash === '#motion' ? 'motion' : 'all';
+    let selected = motion ? 'motion' : 'all';
     let theme = 'dark';
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
     let playing = false;
     document.querySelector('.eyebrow').textContent += ` / 01—${String(concepts.length).padStart(2, '0')}`;
 
     function wireCopy(figure, embed) {
-      figure.querySelector('pre').textContent = embed;
+      figure.querySelector('details pre').textContent = embed;
       figure.querySelector('.copy').addEventListener('click', async () => {
         const status = figure.querySelector('.copy-status');
         try {
@@ -123,18 +138,22 @@
       figure.className = 'study';
       figure.dataset.concept = 'motion';
       figure.innerHTML = `
-        <div class="image-wrap" data-size="full"><img width="1120" height="600" alt="ASCII shapes rotate, terrain waves ripple, and characters reconstruct beside Ranj Rashid's stationary profile."></div>
+        <div class="image-wrap readme-preview" data-size="github">
+          <img width="600" alt="Eight ASCII geometries rotate, ripple, and reconstruct into one another.">
+          <div class="profile-panel"></div>
+        </div>
         <figcaption>
           <div class="caption-top"><div><span class="num"></span><h2>Geometry in motion</h2></div>
             <div class="links"><a class="gif-link" target="_blank" rel="noopener">Open GIF ↗</a><a href="assets/motion-contact-sheet.jpg" target="_blank" rel="noopener">Transition stills ↗</a></div>
           </div>
           <p class="description"></p>
           <div class="playback"><button type="button" class="play" aria-pressed="false">Play animation</button><p class="playback-note" role="status"></p></div>
-          <details><summary>README embed · includes reduced-motion stills</summary><pre></pre>
+          <details><summary>Complete README · linked profile card and reduced-motion stills</summary><pre></pre>
             <div class="embed-actions"><button type="button" class="copy">Copy embed</button><span class="copy-status" role="status"></span></div>
           </details>
         </figcaption>`;
       wireCopy(figure, motion.embed);
+      figure.querySelector('.profile-panel').append(document.querySelector('#profile-panel').content.cloneNode(true));
       figure.querySelector('.num').textContent = `01—${String(motion.shapes.length).padStart(2, '0')}`;
       figure.querySelector('.play').addEventListener('click', () => {
         playing = !playing;
@@ -183,6 +202,9 @@
         let source = `assets/${key}-${theme}.svg`;
         if (key === 'motion') {
           source = `assets/motion-${theme}${playing && !figure.hidden ? '.gif' : '-poster.png'}`;
+          const profileSource = `assets/profile-${theme}.svg`;
+          figure.querySelector('.profile-panel source').srcset = profileSource;
+          figure.querySelector('.profile-panel img').src = profileSource;
           figure.querySelector('.gif-link').href = `assets/motion-${theme}.gif`;
           const mib = (motion.themes[theme].bytes / 1024 / 1024).toFixed(1);
           figure.querySelector('.description').textContent = `${motion.shapes.length} shapes · ${motion.hold_frames / motion.fps}s motion + ${motion.transition_frames / motion.fps}s transition each · ${motion.duration_ms / 1000}-second loop · ${motion.fps} fps · ${motion.width} × ${motion.height} · ${mib} MiB.`;

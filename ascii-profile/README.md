@@ -1,10 +1,10 @@
 # ASCII profile studies
 
-Eight original geometric profile concepts, rendered as ASCII text inside SVGs and a looping animation. The root profile README embeds the animation with theme-aware still fallbacks. The gallery remains available for local review.
+The profile stacks a centered ASCII animation above a separate SVG information card. The card restores the original monospace typography, aligned fields, and accent-colored statistics. Clicking it opens LinkedIn. Each detail appears once, and statistics can update without rebuilding the GIF. Eight earlier SVG card studies remain in the local gallery.
 
 ## Review the concepts
 
-Open `index.html` in a browser. The gallery works from disk with no server or dependencies. Use the concept buttons to inspect a card, switch between light and dark, and check its width. The mobile control scales the complete card to 390 pixels; it does not rearrange text inside the image.
+Open `index.html` in a browser. The gallery works from disk with no server or dependencies. It opens the current animation layout at GitHub's approximate 830-pixel content width. Switch themes and select the 390-pixel mobile preview to check the scaled layout. The animation and information card each display at up to 600 pixels wide and shrink on narrower screens without changing their proportions.
 
 | Concept | Geometry | Character |
 | --- | --- | --- |
@@ -31,12 +31,11 @@ The profile contains the supplied role, location, current work, and LinkedIn add
 
 The updater makes anonymous requests to GitHub's [public user endpoint](https://docs.github.com/en/rest/users/users#get-a-user) and [public repository endpoint](https://docs.github.com/en/rest/repos/repos#list-repositories-for-a-user). It does not read local GitHub credentials, token environment variables, or private endpoints. Only the aggregate counts are saved. Repository names and API responses are not stored.
 
-To refresh the counts and all displayed images locally, use Python 3.12 with the renderer dependency installed:
+To refresh the counts and information cards locally, use Python 3.12 with the test dependencies installed. Existing GIFs do not need to be regenerated:
 
 ```sh
 python3 ascii-profile/update_stats.py
-python3 ascii-profile/animate.py
-python3 ascii-profile/generate.py
+python3 ascii-profile/generate.py --readme README.md
 python3 -m unittest discover -s ascii-profile -p 'test_*.py'
 ```
 
@@ -50,15 +49,19 @@ The workflow in [update-profile-stats.yml](../.github/workflows/update-profile-s
 - After pushes that change the profile configuration, renderer, updater, gallery template, dependency file, or workflow.
 - When you select **Actions → Update public profile statistics → Run workflow**.
 
-After fetching the statistics, the workflow regenerates both GIFs, their still fallbacks, the static SVGs, and the gallery. Scheduled runs skip rendering when the counts are unchanged. Pushes and manual runs also rebuild the images so changes to the profile or renderer are included. The workflow runs the tests before committing only the changed profile data and generated assets. It never force-pushes. A concurrent push can cause its final push to fail safely; rerun the workflow against the latest `main`.
+After fetching changed statistics, the workflow refreshes the information card, README, earlier SVG studies, and gallery. Scheduled runs do not rebuild the GIFs because personal information is separate from the animation. Scheduled runs with unchanged counts do not rewrite the generated files. Pushes and manual runs also rebuild both animation themes and their posters. The workflow runs the tests before committing the changed profile data, generated README section, and assets. It never force-pushes. A concurrent push can cause its final push to fail safely; rerun the workflow against the latest `main`.
 
 No personal access token or custom secret is required. Public data is fetched anonymously. The workflow uses its repository-scoped `GITHUB_TOKEN` only for checkout and the generated-file commit. Its job requests `contents: write`; repository rules must allow that bot commit to `main`. It uses a macOS runner for the same Menlo font as the reviewed preview and pins Pillow to the tested version. No font file is redistributed.
 
-The workflow becomes available after these files are pushed to `main`. The local updater can run before then. GitHub can delay scheduled runs, and public repositories can have schedules disabled after 60 days without activity. Use the manual run when needed. See [GitHub's schedule documentation](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule).
+The workflow is installed on `main`; changes to it take effect after a push. GitHub can delay scheduled runs, and public repositories can have schedules disabled after 60 days without activity. Use the manual run when needed. See [GitHub's schedule documentation](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule).
 
 ## Animated version
 
-Choose **Animation** in the gallery, then **Play animation**. The preview starts still; **Stop animation** returns to its poster. Theme switching works for both the GIF and the poster. Reduced-motion preferences stop playback, and the README embed selects a still image when reduced motion is requested.
+Select **Play animation** in the gallery. The preview starts still; **Stop animation** returns to its poster. Theme switching works for both the GIF and the poster. Reduced-motion preferences stop playback, and the README embed selects a still image when reduced motion is requested. Its image has no fixed display height, so narrow layouts preserve the artwork's aspect ratio.
+
+The animation has an 840 × 588 source canvas and displays at 600 × 420 pixels in the desktop README. The shallower stage gives the information card more space in the first screenful. Glyph spacing is about 13% smaller than the preceding version, and the character grid is centered using the font's advance and ink bounds. It scales down further on narrower screens without distortion.
+
+All personal information sits below the geometry in one 600 × 474 SVG card. It uses the original SFMono-Regular, Consolas, Liberation Mono, Menlo, and monospace font stack. The animation caption, header, and field labels share a 32-pixel inset. Statistics sit in three equal-width, centered columns, with the public-data note centered beneath them. The website is underlined, and the entire card links to LinkedIn through an HTML anchor around its themed `<picture>`. Individual regions of an embedded image are not separate links. The source configuration stores the full HTTPS address in the website field's `href`. The image's alternative text includes the personal details, current counts, and link destination. No external font or image is loaded by the SVG.
 
 The loop lasts 72 seconds at a 20 fps render cadence. Each shape moves for 7 seconds and reconstructs over the next 2 seconds. Cube, crystal, column, and lattice rotate around Y; the torus and chain around X; and the orbital sphere around Z. The crystal and column turn in the opposite direction. The previous slow rotation speeds are preserved: each shape travels approximately 34–49 degrees during its phase, depending on the shape.
 
@@ -66,16 +69,16 @@ Terrain is a separate wave motion, not a rotation. Its viewpoint stays fixed abo
 
 The generator reuses the distance fields in `generate.py`, rotates or deforms the geometry, and samples fresh ASCII characters for each frame. The globe has a filled, shaded surface with less crowded coordinate lines. The terrain uses dense surface shading, darker solid sides, and smaller ripples. Its width and depth are about 25% smaller than the earlier sheet, and its maximum wave amplitude is about 56% lower. `TERRAIN_HALF_EXTENT`, `TERRAIN_BASE`, and `TERRAIN_AMPLITUDES` in `generate.py` control its footprint, depth, and wave height. The gyroid has thicker walls, depth shading, and a cubic guide frame to make the curved channels easier to follow.
 
-During transitions, characters become particles: they leave their grid cells, follow curved paths through a loose swirl, and settle into the next shape. The accent color blends at the same time. The information panel never moves or changes color. The last transition reconstructs the first cube orientation to close the loop.
+During transitions, characters become particles: they leave their grid cells, follow curved paths through a loose swirl, and settle into the next shape. The accent color blends at the same time. The information card stays still below the animation. The last transition reconstructs the first cube orientation to close the loop.
 
-`animate.py` renders those frames with Pillow and encodes two GIFs with a shared palette per theme, no dithering, and optimized delta frames. [Pillow's GIF writer](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#gif) stores the frame durations and infinite-loop setting. It may merge identical neighboring frames while retaining their combined duration. The exports are 1120 × 600; exact sizes and encoded frame counts are in `assets/motion.json`. Intermediate frames are compressed in memory to avoid retaining the full uncompressed sequence.
+`animate.py` renders those frames with Pillow and encodes two GIFs with a shared palette per theme, no dithering, and optimized delta frames. [Pillow's GIF writer](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#gif) stores the frame durations and infinite-loop setting. It may merge identical neighboring frames while retaining their combined duration. Exact sizes and encoded frame counts are in `assets/motion.json`. Intermediate frames are compressed in memory to avoid retaining the full uncompressed sequence. The animation renderer does not read profile data.
 
 To regenerate, install the animation dependency in your Python environment and run:
 
 ```sh
 python3 -m pip install -r ascii-profile/requirements-animation.txt
 python3 ascii-profile/animate.py
-python3 ascii-profile/generate.py
+python3 ascii-profile/generate.py --readme README.md
 python3 -m unittest discover -s ascii-profile -p 'test_*.py'
 ```
 
@@ -87,22 +90,23 @@ The animation assets are:
 
 - `assets/motion-dark.gif` and `assets/motion-light.gif`: looping README images.
 - `assets/motion-dark-poster.png` and `assets/motion-light-poster.png`: still fallbacks.
-- `assets/motion-embed.html`: theme-aware embed with reduced-motion fallbacks.
+- `assets/motion-embed.html`: geometry-only embed with theme-aware reduced-motion fallbacks. The gallery's copy control includes the linked information card as well.
 - `assets/motion-contact-sheet.jpg`: one motion and one transition still for each shape.
+- `assets/profile-dark.svg` and `assets/profile-light.svg`: separate information cards, regenerated when profile data or public statistics change.
 
-The gallery can stop the animation by switching to its poster. A standalone GIF cannot offer its own playback controls, so the README embed also provides reduced-motion stills. The embed has not been published or tested on a live GitHub README. Personal information inside the exported image is not selectable, and a full-width desktop card remains small on mobile; important links and biographical text should also appear as ordinary Markdown when a design is adopted.
+The gallery can stop the animation by switching to its poster. A standalone GIF cannot offer its own playback controls, so the README embed also provides reduced-motion stills. GitHub [removes scripts and custom styles from README HTML](https://github.com/github/markup). An interactive canvas cannot run there. The separate SVG preserves the profile typography, its surrounding HTML link remains clickable, and statistics refresh through Actions rather than browser-side JavaScript.
 
 ## Edit and regenerate
 
 Edit `profile.json`, then run this command from the repository root with Python 3.9 or later:
 
 ```sh
-python3 ascii-profile/generate.py
+python3 ascii-profile/generate.py --readme README.md
 ```
 
-The generator writes two SVG themes, a plain ASCII file, and a README embed for each concept in `assets/`. It also rebuilds `index.html` from `gallery.template.html`. Edit the template, not the generated gallery.
+The generator writes both information-card themes, plus two SVG themes, a plain ASCII file, and a README embed for each earlier concept in `assets/`. It also rebuilds `index.html` from `gallery.template.html`. Edit the template, not the generated gallery. The optional `--readme` path updates the linked profile card and animation section between `PROFILE:START` and `PROFILE:END` comments. Put handwritten additions outside those markers. Missing, repeated, or reversed markers stop the README update without replacing its content.
 
-The card has five information fields and three metrics. Both arrays are in `profile.json`. Long values shrink to fit their column. The statistics updater owns the three metrics and the public-data `note`, which supplies the footer and the embed's alternative text. Personal information and the tagline remain editable.
+The configuration has five information fields and three metrics. Both arrays are in `profile.json`. SVG text keeps its alignment as the card scales, and longer values shrink to fit their columns. Preview long replacements before publishing, especially at mobile width. The statistics updater owns the three metrics and the public-data `note`. Personal information, the website `href`, and the tagline remain editable.
 
 For a local browser preview:
 
@@ -123,7 +127,7 @@ The gallery has a README embed for each concept. After choosing a design, place 
 </picture>
 ```
 
-The `<picture>` selects a theme. The SVG's `viewBox` and `width="100%"` let the card scale with the README. The root README currently uses the animation. The renderers read local profile data; `update_stats.py` and the GitHub Actions workflow provide the public statistics refresh.
+The `<picture>` selects a theme. The SVG's `viewBox` and `width="100%"` let the earlier card scale with the README. The root README uses the smaller centered animation above a separate, linked information card instead. `update_stats.py` and the GitHub Actions workflow provide the public statistics refresh.
 
 ## How the reference works
 
@@ -135,8 +139,6 @@ This prototype independently implements the same general text-in-SVG technique. 
 
 ## Design decisions
 
-The public command reads one profile data file and produces every concept in both themes. A small `Concept` record owns each shape's distance function, orientation, and colors. Layout and personal information are shared across all options so the comparison is about the artwork.
+One profile data file supplies the information cards, accessible README embed, and gallery. A small `Concept` record owns each shape's distance function, orientation, and colors. `Painter` owns only the geometry image. It has no access to personal information or statistics.
 
-Two approaches were considered: editing separate hand-drawn SVG templates, or generating every card from shared data and mathematical geometry. The generator keeps both sets of themed outputs consistent and makes new shapes reproducible. Separate templates would make individual layout changes quicker, but require repeating every information edit.
-
-The Build the Lever principle led to rerunnable generators and a public-statistics updater. Model the Domain led to a concept registry and one profile configuration. Prove It Works means checking the fetched counts against the emitted images, including both themes and narrow widths. Idempotent updates avoid rewriting unchanged data or adding daily commits without changed statistics.
+The vertical layout keeps the geometry and information from competing for horizontal space. `PROFILE_WIDTH` and `PROFILE_INSET` in `generate.py` supply the shared display width and alignment edges for both renderers. The separate SVG preserves the earlier panel's typography. The card remains clickable, profile text appears once, and count-only updates leave the GIF files unchanged.

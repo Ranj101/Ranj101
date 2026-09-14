@@ -10,11 +10,16 @@ import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
+from urllib.parse import urlsplit
 from xml.etree import ElementTree
 
 
 ROOT = Path(__file__).resolve().parent
 WIDTH, HEIGHT = 1120, 600
+PROFILE_WIDTH = 600
+PROFILE_INSET = 32
+PROFILE_START = "<!-- PROFILE:START -->"
+PROFILE_END = "<!-- PROFILE:END -->"
 COLS, ROWS = 68, 34
 TERRAIN_HALF_EXTENT = 1.08
 TERRAIN_BASE = -0.42
@@ -283,12 +288,109 @@ def embed(concept: Concept, profile: dict, prefix="ascii-profile/assets/") -> st
     )
 
 
-def generate(config: Path, output: Path) -> None:
+def profile_description(profile: dict) -> str:
+    details = [f"{profile['name']}, @{profile['handle']}", profile["tagline"].rstrip(".")]
+    details.extend(f"{field['label']}: {field['value']}" for field in profile["fields"])
+    details.extend(f"{metric['label']}: {metric['value']}" for metric in profile["metrics"])
+    return ". ".join(details) + ". " + profile["note"]
+
+
+def information_svg(profile: dict, theme: str) -> str:
+    dark = theme == "dark"
+    background = "#0d1117" if dark else "#ffffff"
+    text = "#e6edf3" if dark else "#1f2937"
+    muted = "#9da7b5" if dark else "#596675"
+    line = "#28323e" if dark else "#dce3e9"
+    accent = CONCEPTS[0].dark if dark else CONCEPTS[0].light
+    left, right = PROFILE_INSET, PROFILE_WIDTH - PROFILE_INSET
+    content_width = right - left
+    esc = html.escape
+    parts = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{PROFILE_WIDTH}" height="474" '
+        f'viewBox="0 0 {PROFILE_WIDTH} 474" role="img" aria-labelledby="title desc">',
+        f'<title id="title">{esc(profile["name"])} / Profile</title>',
+        f'<desc id="desc">{esc(profile_description(profile))}</desc>',
+        '<style>text{font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;'
+        'font-variant-ligatures:none;font-variant-numeric:tabular-nums}</style>',
+        f'<rect x="0.5" y="0.5" width="{PROFILE_WIDTH - 1}" height="473" rx="12" fill="{background}" stroke="{line}"/>',
+        f'<path d="M1 60H{PROFILE_WIDTH - 1}M{left} 350H{right}" stroke="{line}" fill="none"/>',
+    ]
+
+    def label(x, y, value, size=14, color=muted, weight=400, max_width=None, extra=""):
+        if max_width:
+            size = min(size, max_width / (max(1, len(value)) * 0.62))
+        parts.append(f'<text x="{x}" y="{y}" fill="{color}" font-size="{size:.2f}" '
+                     f'font-weight="{weight}" {extra}>{esc(value)}</text>')
+
+    label(left, 37, f"{profile['handle'].lower()}@github", 14, text, max_width=370)
+    label(right, 37, "LINKEDIN ↗", 11, accent, extra='text-anchor="end"')
+    label(left, 90, "HELLO, I'M", 12, accent, extra='letter-spacing="2"')
+    label(left - 2, 129, profile["name"], 37, text, 600, content_width)
+    label(left, 158, profile["tagline"], 14, muted, max_width=content_width)
+    for i, field in enumerate(profile["fields"]):
+        y = 201 + i * 32
+        label(left, y, field["label"], 14, muted, max_width=88)
+        label(left + 96, y, ":", 14, muted)
+        website = field["label"] == "website"
+        label(left + 120, y, field["value"], 15, accent if website else text, max_width=content_width - 120,
+              extra='text-decoration="underline"' if website else "")
+    for i, metric in enumerate(profile["metrics"]):
+        x = left + (i + 0.5) * content_width / len(profile["metrics"])
+        label(x, 390, metric["value"], 26, accent, 500, 162, extra=f'text-anchor="middle" id="metric-{i}"')
+        label(x, 414, metric["label"], 11, muted, max_width=162, extra='text-anchor="middle"')
+    label(PROFILE_WIDTH / 2, 457, profile["note"], 10, muted, max_width=content_width, extra='text-anchor="middle"')
+    parts.append('</svg>')
+    return "\n".join(parts) + "\n"
+
+
+def profile_panel(profile: dict, prefix="ascii-profile/assets/") -> str:
+    esc = html.escape
+    fields = {field["label"]: field for field in profile["fields"]}
+    website = fields["website"]["href"]
+    url = urlsplit(website)
+    if url.scheme != "https" or not url.netloc:
+        raise ValueError("The website href must be an HTTPS URL.")
+    description = profile_description(profile) + " Open LinkedIn profile."
+    return (
+        '<p align="center">\n'
+        f'<a href="{esc(website)}">\n'
+        '<picture>\n'
+        f'  <source media="(prefers-color-scheme: dark)" srcset="{prefix}profile-dark.svg">\n'
+        f'  <img alt="{esc(description)}" src="{prefix}profile-light.svg" width="{PROFILE_WIDTH}">\n'
+        '</picture>\n'
+        '</a>\n'
+        '</p>\n'
+    )
+
+
+def write_readme(path: Path, profile: str) -> None:
+    generated = PROFILE_START + "\n" + profile + PROFILE_END
+    if path.exists():
+        existing = path.read_text(encoding="utf-8")
+        if existing.count(PROFILE_START) != 1 or existing.count(PROFILE_END) != 1:
+            raise ValueError("The README must contain exactly one PROFILE:START and PROFILE:END marker.")
+        before, remainder = existing.split(PROFILE_START)
+        if PROFILE_END not in remainder:
+            raise ValueError("The README profile markers are out of order.")
+        _, after = remainder.split(PROFILE_END)
+        content = before + generated + after
+    else:
+        content = generated + "\n"
+    path.write_text(content, encoding="utf-8")
+
+
+def generate(config: Path, output: Path, readme: Path | None = None) -> None:
     profile = json.loads(config.read_text(encoding="utf-8"))
     if len(profile["fields"]) != 5 or len(profile["metrics"]) != 3:
         raise ValueError("This card layout needs five profile fields and three metrics.")
     assets = output / "assets"
     assets.mkdir(parents=True, exist_ok=True)
+    panel = profile_panel(profile)
+    for theme in ("dark", "light"):
+        svg = information_svg(profile, theme)
+        ElementTree.fromstring(svg)
+        (assets / f"profile-{theme}.svg").write_text(svg, encoding="utf-8")
+    print("Generated profile card: dark SVG, light SVG, linked README embed")
     catalog = []
     for concept in CONCEPTS:
         grid = render_ascii(concept)
@@ -307,9 +409,16 @@ def generate(config: Path, output: Path) -> None:
     motion_path = assets / "motion.json"
     motion = json.loads(motion_path.read_text(encoding="utf-8")) if motion_path.exists() else None
     if motion:
-        motion["embed"] = (assets / "motion-embed.html").read_text(encoding="utf-8")
+        animation = (assets / "motion-embed.html").read_text(encoding="utf-8")
+        motion["embed"] = animation + "\n" + panel
+    if readme is not None:
+        if not motion:
+            raise ValueError("Generate the animation before exporting the README.")
+        write_readme(readme, motion["embed"])
     template = (ROOT / "gallery.template.html").read_text(encoding="utf-8")
     gallery = template.replace("__CONCEPT_DATA__", data).replace("__MOTION_DATA__", json.dumps(motion).replace("<", "\\u003c"))
+    gallery = gallery.replace("__PROFILE_PANEL__", profile_panel(profile, prefix="assets/"))
+    gallery = gallery.replace("__PROFILE_WIDTH__", str(PROFILE_WIDTH))
     (output / "index.html").write_text(gallery, encoding="utf-8")
     print(f"Gallery: {output / 'index.html'}")
 
@@ -318,5 +427,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=ROOT / "profile.json")
     parser.add_argument("--output", type=Path, default=ROOT)
+    parser.add_argument("--readme", type=Path, help="Also write the linked profile card and animation to this README")
     args = parser.parse_args()
-    generate(args.config.resolve(), args.output.resolve())
+    generate(args.config.resolve(), args.output.resolve(), args.readme)

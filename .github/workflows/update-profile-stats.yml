@@ -58,12 +58,19 @@ jobs:
           else
             echo "render=false" >> "$GITHUB_OUTPUT"
           fi
+          if [[ "$GITHUB_EVENT_NAME" != "schedule" ]]; then
+            echo "animation=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "animation=false" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Regenerate both themes and the gallery
+      - name: Rebuild the geometry animation after source changes
+        if: steps.statistics.outputs.animation == 'true'
+        run: python ascii-profile/animate.py
+
+      - name: Refresh the profile card, README, and gallery
         if: steps.statistics.outputs.render == 'true'
-        run: |
-          python ascii-profile/animate.py
-          python ascii-profile/generate.py
+        run: python ascii-profile/generate.py --readme README.md
 
       - name: Verify the generated profile
         if: steps.statistics.outputs.render == 'true'
@@ -75,7 +82,7 @@ jobs:
         if: steps.statistics.outputs.render == 'true'
         shell: bash
         run: |
-          git add -- ascii-profile/profile.json ascii-profile/assets ascii-profile/index.html
+          git add -- README.md ascii-profile/profile.json ascii-profile/assets ascii-profile/index.html
           if git diff --cached --quiet; then
             exit 0
           fi

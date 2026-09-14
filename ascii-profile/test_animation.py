@@ -6,8 +6,8 @@ import unittest
 
 from PIL import Image, ImageChops, ImageColor, ImageSequence
 
-from animate import CONCEPTS, MOTIONS, ROOT, Painter, Rotation, Wave, concept_at, find_font, global_palette, mix, morph, particle_pairs, shape_at, smooth
-from generate import COLS, ROWS, TERRAIN_AMPLITUDES, TERRAIN_BASE, TERRAIN_HALF_EXTENT, rotate, terrain, terrain_height
+from animate import ART_BOUNDS, CONCEPTS, HEIGHT, MOTIONS, ROOT, WIDTH, Glyph, Painter, Rotation, Wave, concept_at, find_font, global_palette, mix, morph, particle_pairs, shape_at, smooth
+from generate import COLS, PROFILE_INSET, PROFILE_WIDTH, ROWS, TERRAIN_AMPLITUDES, TERRAIN_BASE, TERRAIN_HALF_EXTENT, rotate, terrain, terrain_height
 
 
 class AnimationTests(unittest.TestCase):
@@ -15,12 +15,54 @@ class AnimationTests(unittest.TestCase):
     def setUpClass(cls):
         cls.starts = [shape_at(i, 0) for i in range(len(CONCEPTS))]
         cls.ends = [shape_at(i, 1) for i in range(len(CONCEPTS))]
-        cls.painter = Painter(json.loads((ROOT / "profile.json").read_text()), "dark", find_font(None))
+        cls.painter = Painter("dark", find_font(None))
         cls.palette = global_palette("dark")
 
     def art(self, particles):
         image = self.painter.frame(particles, (125, 211, 252), 0)
-        return image.quantize(palette=self.palette, dither=Image.Dither.NONE).convert("RGB").crop((30, 98, 552, 500))
+        return image.quantize(palette=self.palette, dither=Image.Dither.NONE).convert("RGB").crop(ART_BOUNDS)
+
+    def test_art_stage_has_no_sidebar_or_personal_information(self):
+        self.assertGreater((ART_BOUNDS[2] - ART_BOUNDS[0]) / WIDTH, 0.90)
+        self.assertEqual(self.painter.base.getextrema(), ((13, 13), (17, 17), (23, 23)))
+
+    def test_geometry_is_centered_on_the_profile_column(self):
+        for index in (0, 1, 2, 3, 6, 7):
+            for progress in (0, 0.5, 1):
+                with self.subTest(shape=CONCEPTS[index].key, progress=progress):
+                    frame = self.painter.frame(shape_at(index, progress), (125, 211, 252), index)
+                    bounds = ImageChops.difference(frame, self.painter.base).crop(ART_BOUNDS).getbbox()
+                    center = ART_BOUNDS[0] + (bounds[0] + bounds[2]) / 2
+                    self.assertAlmostEqual(center, WIDTH / 2, delta=2)
+
+    def test_animation_caption_aligns_with_profile_text(self):
+        frame = self.painter.frame([], (125, 211, 252), 0)
+        bounds = ImageChops.difference(frame, self.painter.base).getbbox()
+        self.assertAlmostEqual(bounds[0] * PROFILE_WIDTH / WIDTH, PROFILE_INSET, delta=2)
+        self.assertLessEqual(bounds[2] * PROFILE_WIDTH / WIDTH, PROFILE_WIDTH - PROFILE_INSET + 1)
+
+    def test_complete_character_grid_fits_with_ink_clearance(self):
+        corners = [Glyph(x, y, chr(code), 1) for x in (34, 34 + (COLS - 1) * 7.3)
+                   for y in (119, 119 + (ROWS - 1) * 11.2) for code in range(33, 127)]
+        frame = self.painter.frame(corners, (125, 211, 252), 0)
+        bounds = ImageChops.difference(frame, self.painter.base).crop((0, 0, WIDTH, 528)).getbbox()
+        self.assertGreaterEqual(bounds[0], ART_BOUNDS[0])
+        self.assertGreaterEqual(bounds[1], ART_BOUNDS[1])
+        self.assertLessEqual(bounds[2], ART_BOUNDS[2])
+        self.assertLessEqual(bounds[3], ART_BOUNDS[3])
+
+    def test_compact_stage_preserves_clearance_for_every_shape_and_transition(self):
+        for index in range(len(CONCEPTS)):
+            pairs = particle_pairs(self.ends[index], self.starts[(index + 1) % len(CONCEPTS)])
+            for progress in (0, 0.125, 0.25, 0.5, 0.75, 0.875, 1):
+                for particles in (shape_at(index, progress), morph(pairs, progress)):
+                    frame = self.painter.frame(particles, (125, 211, 252), index)
+                    bounds = ImageChops.difference(frame, self.painter.base).crop((0, 0, WIDTH, 528)).getbbox()
+                    with self.subTest(shape=CONCEPTS[index].key, progress=progress):
+                        self.assertGreaterEqual(bounds[0], ART_BOUNDS[0])
+                        self.assertGreaterEqual(bounds[1], ART_BOUNDS[1])
+                        self.assertLessEqual(bounds[2], ART_BOUNDS[2])
+                        self.assertLessEqual(bounds[3], ART_BOUNDS[3])
 
     def test_every_rotation_moves(self):
         for index in range(len(CONCEPTS)):
@@ -97,26 +139,31 @@ class AnimationTests(unittest.TestCase):
                     self.assertGreaterEqual(glyph.y - 14, 98)
                     self.assertLessEqual(glyph.y + 6, 500)
 
-    def test_encoded_gifs_and_stationary_information(self):
+    def test_encoded_gifs_have_correct_timing_and_seamless_geometry(self):
         assets = ROOT / "assets"
         manifest = json.loads((assets / "motion.json").read_text())
         for theme in ("dark", "light"):
             with self.subTest(theme=theme), Image.open(assets / f"motion-{theme}.gif") as animation:
-                self.assertEqual(animation.size, (1120, 600))
+                base = Painter(theme, find_font(None)).base
+                self.assertEqual(animation.size, (WIDTH, HEIGHT))
+                self.assertEqual(animation.size, (manifest["width"], manifest["height"]))
                 self.assertEqual(animation.info["loop"], 0)
                 first = animation.convert("RGB")
-                panel = first.crop((559, 0, 1120, 600))
                 duration = 0
                 seen = set()
                 for frame in ImageSequence.Iterator(animation):
                     rendered = frame.convert("RGB")
-                    self.assertIsNone(ImageChops.difference(panel, rendered.crop((559, 0, 1120, 600))).getbbox())
+                    bounds = ImageChops.difference(rendered, base).crop((0, 0, WIDTH, 528)).getbbox()
+                    self.assertGreaterEqual(bounds[0], ART_BOUNDS[0])
+                    self.assertGreaterEqual(bounds[1], ART_BOUNDS[1])
+                    self.assertLessEqual(bounds[2], ART_BOUNDS[2])
+                    self.assertLessEqual(bounds[3], ART_BOUNDS[3])
                     self.assertGreaterEqual(frame.info["duration"], 1000 / manifest["fps"])
-                    seen.add(hashlib.sha256(rendered.crop((30, 98, 552, 500)).tobytes()).digest())
+                    seen.add(hashlib.sha256(rendered.crop(ART_BOUNDS).tobytes()).digest())
                     duration += frame.info["duration"]
                 self.assertEqual(duration, manifest["duration_ms"])
                 self.assertGreater(len(seen), manifest["frames"] * 0.85)
-                seam = ImageChops.difference(first.crop((30, 98, 552, 500)), rendered.crop((30, 98, 552, 500)))
+                seam = ImageChops.difference(first.crop(ART_BOUNDS), rendered.crop(ART_BOUNDS))
                 self.assertIsNone(seam.getbbox())
                 with Image.open(assets / f"motion-{theme}-poster.png") as poster:
                     self.assertIsNone(ImageChops.difference(first, poster.convert("RGB")).getbbox())
@@ -125,9 +172,8 @@ class AnimationTests(unittest.TestCase):
         assets = ROOT / "assets"
         manifest = json.loads((assets / "motion.json").read_text())
         hold, transition, fps = (manifest[key] for key in ("hold_frames", "transition_frames", "fps"))
-        profile = json.loads((ROOT / "profile.json").read_text())
         for theme in ("dark", "light"):
-            painter, palette = Painter(profile, theme, find_font(None)), global_palette(theme)
+            painter, palette = Painter(theme, find_font(None)), global_palette(theme)
             samples = {}
             for index, concept in enumerate(CONCEPTS):
                 accent = ImageColor.getrgb(getattr(concept, theme))

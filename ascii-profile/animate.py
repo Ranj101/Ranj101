@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import html
 import json
 import math
 from dataclasses import dataclass, replace
@@ -14,7 +13,17 @@ from pathlib import Path
 
 from PIL import Image, ImageColor, ImageDraw, ImageFont
 
-from generate import CONCEPTS, HEIGHT, ROOT, WIDTH, render_ascii, terrain
+from generate import COLS, CONCEPTS, PROFILE_INSET, PROFILE_WIDTH, ROOT, ROWS, render_ascii, terrain
+
+
+WIDTH, HEIGHT = 840, 588
+ART_SCALE = 1.30
+ART_BOUNDS = (32, 8, 808, 512)
+GRID_CENTER = (34 + (COLS - 1) * 7.3 / 2, 119 + (ROWS - 1) * 11.2 / 2)
+ART_CENTER = (WIDTH / 2, (ART_BOUNDS[1] + ART_BOUNDS[3]) / 2)
+CAPTION_INSET = PROFILE_INSET * WIDTH / PROFILE_WIDTH
+GLYPH_FONT_SIZE = 16
+GLYPH_WIDTH, GLYPH_HEIGHT, GLYPH_BASELINE = 18, 30, 21
 
 
 @dataclass(frozen=True)
@@ -139,11 +148,14 @@ def find_font(requested: Path | None) -> str:
 
 
 class Painter:
-    def __init__(self, profile: dict, theme: str, font_path: str):
-        self.profile = profile
+    def __init__(self, theme: str, font_path: str):
         self.theme = theme
         self.font_path = font_path
         self.colors = {key: ImageColor.getrgb(value) for key, value in THEMES[theme].items()}
+        glyph_font = self.font(GLYPH_FONT_SIZE)
+        self.glyph_advance = glyph_font.getlength("M")
+        _, top, _, bottom = glyph_font.getbbox("M", anchor="ls")
+        self.glyph_ink_center = (top + bottom) / 2
         self.base = self.make_base()
 
     @lru_cache(maxsize=48)
@@ -159,34 +171,12 @@ class Painter:
         draw.text((x, y), value, font=font, fill=color or self.colors["muted"], anchor="ls")
 
     def make_base(self) -> Image.Image:
-        image = Image.new("RGB", (WIDTH, HEIGHT), self.colors["background"])
-        draw = ImageDraw.Draw(image)
-        line = self.colors["line"]
-        draw.rounded_rectangle((0, 0, WIDTH - 1, HEIGHT - 1), radius=12, outline=line)
-        for coords in ((1, 63, 1119, 63), (559, 96, 559, 510), (32, 542, 1088, 542), (602, 431, 1079, 431)):
-            draw.line(coords, fill=line)
-        self.text(draw, 32, 39, f"{self.profile['handle'].lower()}@github", 15, self.colors["text"])
-        self.text(draw, 826, 39, "GEOMETRY IN MOTION", 13)
-        self.text(draw, 602, 120, "HELLO, I'M", 12)
-        self.text(draw, 600, 169, self.profile["name"], 37, self.colors["text"], 475)
-        self.text(draw, 602, 200, self.profile["tagline"], 14, max_width=468)
-        for i, field in enumerate(self.profile["fields"]):
-            y = 255 + i * 35
-            self.text(draw, 602, y, field["label"], 14, max_width=98)
-            self.text(draw, 709, y, ":", 14)
-            self.text(draw, 728, y, field["value"], 15, self.colors["text"], 350)
-        for i, metric in enumerate(self.profile["metrics"]):
-            x = 602 + i * 164
-            self.text(draw, x, 470, metric["value"], 26, self.colors["text"], 130)
-            self.text(draw, x, 496, metric["label"], 11, max_width=134)
-        self.text(draw, 32, 575, "ASCII / MOTION / RECONSTRUCT / REPEAT", 11)
-        self.text(draw, 622, 575, self.profile["note"], 10, max_width=462)
-        return image
+        return Image.new("RGB", (WIDTH, HEIGHT), self.colors["background"])
 
     @lru_cache(maxsize=64)
     def glyph_mask(self, char: str) -> Image.Image:
-        mask = Image.new("L", (12, 20))
-        ImageDraw.Draw(mask).text((0, 14), char, font=self.font(12), fill=255, anchor="ls")
+        mask = Image.new("L", (GLYPH_WIDTH, GLYPH_HEIGHT))
+        ImageDraw.Draw(mask).text((0, GLYPH_BASELINE), char, font=self.font(GLYPH_FONT_SIZE), fill=255, anchor="ls")
         return mask
 
     def frame(self, particles: list[Glyph], accent: tuple, index: int, transition: float | None = None):
@@ -196,20 +186,21 @@ class Painter:
                 continue
             shade = mix(self.colors["shadow"], accent, 0.28 + 0.72 * glyph.intensity)
             shade = mix(self.colors["background"], shade, glyph.opacity)
-            x, y = round(glyph.x), round(glyph.y) - 14
-            image.paste(shade, (x, y, x + 12, y + 20), self.glyph_mask(glyph.char))
+            x = round(ART_CENTER[0] + (glyph.x - GRID_CENTER[0]) * ART_SCALE - self.glyph_advance / 2)
+            y = round(ART_CENTER[1] + (glyph.y - GRID_CENTER[1]) * ART_SCALE - self.glyph_ink_center) - GLYPH_BASELINE
+            image.paste(shade, (x, y, x + GLYPH_WIDTH, y + GLYPH_HEIGHT), self.glyph_mask(glyph.char))
         draw = ImageDraw.Draw(image)
         if transition is None:
-            self.text(draw, 34, 511, f"{index + 1:02d} / {CONCEPTS[index].name.upper()}", 12, accent)
-            self.text(draw, 34, 530, MOTIONS[CONCEPTS[index].key].label, 10)
+            self.text(draw, CAPTION_INSET, 550, f"{index + 1:02d} / {CONCEPTS[index].name.upper()}", 18, accent)
+            self.text(draw, CAPTION_INSET, 574, MOTIONS[CONCEPTS[index].key].label, 15)
         else:
             next_index = (index + 1) % len(CONCEPTS)
-            self.text(draw, 34, 511, f"{index + 1:02d} > {next_index + 1:02d} / RECONSTRUCTING", 12, accent)
-            self.text(draw, 34, 530, f"FORMING {CONCEPTS[next_index].name.upper()}", 10)
+            self.text(draw, CAPTION_INSET, 550, f"{index + 1:02d} > {next_index + 1:02d} / RECONSTRUCTING", 18, accent)
+            self.text(draw, CAPTION_INSET, 574, f"FORMING {CONCEPTS[next_index].name.upper()}", 15)
         for i in range(len(CONCEPTS)):
             color = accent if i == index else self.colors["line"]
-            x = round(424 + i * 100 / max(1, len(CONCEPTS) - 1))
-            draw.line((x, 522, x + 8, 522), fill=color, width=2)
+            x = round(WIDTH - CAPTION_INSET - 162 + i * 150 / max(1, len(CONCEPTS) - 1))
+            draw.line((x, 564, x + 12, 564), fill=color, width=3)
         return image
 
 
@@ -230,28 +221,27 @@ def global_palette(theme: str) -> Image.Image:
     return palette
 
 
-def animation_embed(profile: dict) -> str:
+def animation_embed() -> str:
     prefix = "ascii-profile/assets/motion"
-    alt = html.escape(f"{profile['name']}'s profile. {len(CONCEPTS)} animated ASCII shapes reconstruct into one another. {profile['note']}")
+    alt = f"{len(CONCEPTS)} ASCII geometries rotate, ripple, and reconstruct into one another."
     return (
+        '<p align="center">\n'
         '<picture>\n'
         f'  <source media="(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset="{prefix}-dark-poster.png">\n'
         f'  <source media="(prefers-reduced-motion: reduce)" srcset="{prefix}-light-poster.png">\n'
         f'  <source media="(prefers-color-scheme: dark)" srcset="{prefix}-dark.gif">\n'
-        f'  <img alt="{alt}" src="{prefix}-light.gif" width="100%">\n'
+        f'  <img alt="{alt}" src="{prefix}-light.gif" width="{PROFILE_WIDTH}">\n'
         '</picture>\n'
+        '</p>\n'
     )
 
 
-def generate(config: Path, output: Path, font_path: str, fps=20, hold=7.0, transition=2.0):
-    profile = json.loads(config.read_text(encoding="utf-8"))
-    if len(profile["fields"]) != 5 or len(profile["metrics"]) != 3:
-        raise ValueError("This card layout needs five profile fields and three metrics.")
+def generate(output: Path, font_path: str, fps=20, hold=7.0, transition=2.0):
     hold_frames, morph_frames = round(hold * fps), round(transition * fps)
     if min(hold_frames, morph_frames) < 2:
         raise ValueError("Hold and transition must each contain at least two frames.")
     output.mkdir(parents=True, exist_ok=True)
-    painters = {theme: Painter(profile, theme, font_path) for theme in THEMES}
+    painters = {theme: Painter(theme, font_path) for theme in THEMES}
     palettes = {theme: global_palette(theme) for theme in THEMES}
     frames = {theme: [] for theme in THEMES}
     samples = []
@@ -309,27 +299,30 @@ def generate(config: Path, output: Path, font_path: str, fps=20, hold=7.0, trans
         manifest["themes"][theme] = {"file": target.name, "bytes": target.stat().st_size, "encoded_frames": encoded_frames}
         print(f"Saved {target.name}: {target.stat().st_size / 1024 / 1024:.2f} MiB", flush=True)
 
-    sheet = Image.new("RGB", (WIDTH, len(CONCEPTS) * 322), THEMES["dark"]["background"])
+    thumbnail_width = WIDTH // 2
+    thumbnail_height = HEIGHT // 2
+    row_height = thumbnail_height + 22
+    sheet = Image.new("RGB", (WIDTH, len(CONCEPTS) * row_height), THEMES["dark"]["background"])
     draw = ImageDraw.Draw(sheet)
     for row, (name, shape_frame, morph_frame) in enumerate(samples):
-        draw.text((16, row * 322 + 5), name + " / motion                           transition / scattered characters",
+        draw.text((16, row * row_height + 5), name + " / motion                 transition / scattered characters",
                   font=painters["dark"].font(12), fill=THEMES["dark"]["text"])
         for col, frame in enumerate((shape_frame, morph_frame)):
             with Image.open(BytesIO(frames["dark"][frame])) as sample:
-                sheet.paste(sample.convert("RGB").resize((560, 300), Image.Resampling.LANCZOS), (col * 560, row * 322 + 22))
+                sheet.paste(sample.convert("RGB").resize((thumbnail_width, thumbnail_height), Image.Resampling.LANCZOS),
+                            (col * thumbnail_width, row * row_height + 22))
     sheet.save(output / "motion-contact-sheet.jpg", quality=90)
-    (output / "motion-embed.html").write_text(animation_embed(profile), encoding="utf-8")
+    (output / "motion-embed.html").write_text(animation_embed(), encoding="utf-8")
     (output / "motion.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(f"Complete: {sum(durations) / 1000:g}-second seamless sequence, both themes.")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--config", type=Path, default=ROOT / "profile.json")
     parser.add_argument("--output", type=Path, default=ROOT / "assets")
     parser.add_argument("--font", type=Path)
     parser.add_argument("--fps", type=int, choices=(10, 20, 25), default=20)
     parser.add_argument("--hold", type=float, default=7.0, help="Seconds of rotation per shape")
     parser.add_argument("--transition", type=float, default=2.0, help="Seconds of particle motion per transition")
     args = parser.parse_args()
-    generate(args.config, args.output, find_font(args.font), args.fps, args.hold, args.transition)
+    generate(args.output, find_font(args.font), args.fps, args.hold, args.transition)

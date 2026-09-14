@@ -1,6 +1,6 @@
 {
-  "width": 1120,
-  "height": 600,
+  "width": 840,
+  "height": 588,
   "fps": 20,
   "frames": 1440,
   "duration_ms": 72000,
@@ -10,13 +10,13 @@
   "themes": {
     "dark": {
       "file": "motion-dark.gif",
-      "bytes": 8068225,
-      "encoded_frames": 1366
+      "bytes": 12438007,
+      "encoded_frames": 1367
     },
     "light": {
       "file": "motion-light.gif",
-      "bytes": 8083311,
-      "encoded_frames": 1375
+      "bytes": 12592620,
+      "encoded_frames": 1370
     }
   },
   "shapes": [

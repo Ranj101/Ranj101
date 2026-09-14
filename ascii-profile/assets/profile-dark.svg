@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="474" viewBox="0 0 600 474" role="img" aria-labelledby="title desc">
+<title id="title">Ranj Rashid / Profile</title>
+<desc id="desc">Ranj Rashid, @Ranj101. Building dependable software for public services. role: Software Engineer. location: Erbil, Iraq. stack: C# · Rust · .NET · PostgreSQL. building: KRG Projects. website: linkedin.com/in/ranjrashid. public repos: 5. stars received: 1. followers: 26. Public GitHub statistics only.</desc>
+<style>text{font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-variant-ligatures:none;font-variant-numeric:tabular-nums}</style>
+<rect x="0.5" y="0.5" width="599" height="473" rx="12" fill="#0d1117" stroke="#28323e"/>
+<path d="M1 60H599M32 350H568" stroke="#28323e" fill="none"/>
+<text x="32" y="37" fill="#e6edf3" font-size="14.00" font-weight="400" >ranj101@github</text>
+<text x="568" y="37" fill="#7dd3fc" font-size="11.00" font-weight="400" text-anchor="end">LINKEDIN ↗</text>
+<text x="32" y="90" fill="#7dd3fc" font-size="12.00" font-weight="400" letter-spacing="2">HELLO, I&#x27;M</text>
+<text x="30" y="129" fill="#e6edf3" font-size="37.00" font-weight="600" >Ranj Rashid</text>
+<text x="32" y="158" fill="#9da7b5" font-size="14.00" font-weight="400" >Building dependable software for public services.</text>
+<text x="32" y="201" fill="#9da7b5" font-size="14.00" font-weight="400" >role</text>
+<text x="128" y="201" fill="#9da7b5" font-size="14.00" font-weight="400" >:</text>
+<text x="152" y="201" fill="#e6edf3" font-size="15.00" font-weight="400" >Software Engineer</text>
+<text x="32" y="233" fill="#9da7b5" font-size="14.00" font-weight="400" >location</text>
+<text x="128" y="233" fill="#9da7b5" font-size="14.00" font-weight="400" >:</text>
+<text x="152" y="233" fill="#e6edf3" font-size="15.00" font-weight="400" >Erbil, Iraq</text>
+<text x="32" y="265" fill="#9da7b5" font-size="14.00" font-weight="400" >stack</text>
+<text x="128" y="265" fill="#9da7b5" font-size="14.00" font-weight="400" >:</text>
+<text x="152" y="265" fill="#e6edf3" font-size="15.00" font-weight="400" >C# · Rust · .NET · PostgreSQL</text>
+<text x="32" y="297" fill="#9da7b5" font-size="14.00" font-weight="400" >building</text>
+<text x="128" y="297" fill="#9da7b5" font-size="14.00" font-weight="400" >:</text>
+<text x="152" y="297" fill="#e6edf3" font-size="15.00" font-weight="400" >KRG Projects</text>
+<text x="32" y="329" fill="#9da7b5" font-size="14.00" font-weight="400" >website</text>
+<text x="128" y="329" fill="#9da7b5" font-size="14.00" font-weight="400" >:</text>
+<text x="152" y="329" fill="#7dd3fc" font-size="15.00" font-weight="400" text-decoration="underline">linkedin.com/in/ranjrashid</text>
+<text x="121.33333333333333" y="390" fill="#7dd3fc" font-size="26.00" font-weight="500" text-anchor="middle" id="metric-0">5</text>
+<text x="121.33333333333333" y="414" fill="#9da7b5" font-size="11.00" font-weight="400" text-anchor="middle">public repos</text>
+<text x="300.0" y="390" fill="#7dd3fc" font-size="26.00" font-weight="500" text-anchor="middle" id="metric-1">1</text>
+<text x="300.0" y="414" fill="#9da7b5" font-size="11.00" font-weight="400" text-anchor="middle">stars received</text>
+<text x="478.6666666666667" y="390" fill="#7dd3fc" font-size="26.00" font-weight="500" text-anchor="middle" id="metric-2">26</text>
+<text x="478.6666666666667" y="414" fill="#9da7b5" font-size="11.00" font-weight="400" text-anchor="middle">followers</text>
+<text x="300.0" y="457" fill="#9da7b5" font-size="10.00" font-weight="400" text-anchor="middle">Public GitHub statistics only.</text>
+</svg>
