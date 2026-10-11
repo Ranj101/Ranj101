@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="600" height="474" viewBox="0 0 600 474" role="img" aria-labelledby="title desc">
 <title id="title">Source file / Ranj Rashid</title>
-<desc id="desc">Ranj Rashid, @Ranj101. Building dependable software for public services. role: Software Engineer. location: Erbil, Iraq. stack: C# · Rust · .NET · PostgreSQL. building: KRG Projects. website: linkedin.com/in/ranjrashid. public repos: 5. stars received: 1. followers: 26. Public GitHub statistics only.</desc>
+<desc id="desc">Ranj Rashid, @Ranj101. Building dependable software for public services. role: Software Engineer. location: Erbil, Iraq. stack: C# · Rust · .NET · PostgreSQL. building: KRG Projects. website: linkedin.com/in/ranjrashid. public repos: 5. stars received: 1. followers: 27. Public GitHub statistics only.</desc>
 <style>text{font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;font-variant-ligatures:none;font-variant-numeric:tabular-nums}</style>
 <rect width="600" height="474" fill="#ffffff"/>
 <text x="32" y="35" fill="#7151b8" font-size="14.00" font-weight="500" >profile.rs</text>
@@ -28,7 +28,7 @@
 <text x="32" y="420" fill="#596675" font-size="12.00" font-weight="400" >public repos</text>
 <text x="216" y="397" fill="#7151b8" font-size="27.00" font-weight="500" >1</text>
 <text x="216" y="420" fill="#596675" font-size="12.00" font-weight="400" >stars received</text>
-<text x="400" y="397" fill="#7151b8" font-size="27.00" font-weight="500" >26</text>
+<text x="400" y="397" fill="#7151b8" font-size="27.00" font-weight="500" >27</text>
 <text x="400" y="420" fill="#596675" font-size="12.00" font-weight="400" >followers</text>
 <text x="32" y="451" fill="#596675" font-size="11.00" font-weight="400" >Public GitHub statistics only.</text>
 <text x="568" y="451" fill="#7151b8" font-size="11.00" font-weight="400" text-anchor="end">LinkedIn ↗</text>

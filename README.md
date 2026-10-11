@@ -12,7 +12,7 @@
 <a href="https://www.linkedin.com/in/ranjrashid/">
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="ascii-profile/assets/profile-dark.svg">
-  <img alt="Ranj Rashid, @Ranj101. Building dependable software for public services. role: Software Engineer. location: Erbil, Iraq. stack: C# · Rust · .NET · PostgreSQL. building: KRG Projects. website: linkedin.com/in/ranjrashid. public repos: 5. stars received: 1. followers: 26. Public GitHub statistics only. Open LinkedIn profile." src="ascii-profile/assets/profile-light.svg" width="600">
+  <img alt="Ranj Rashid, @Ranj101. Building dependable software for public services. role: Software Engineer. location: Erbil, Iraq. stack: C# · Rust · .NET · PostgreSQL. building: KRG Projects. website: linkedin.com/in/ranjrashid. public repos: 5. stars received: 1. followers: 27. Public GitHub statistics only. Open LinkedIn profile." src="ascii-profile/assets/profile-light.svg" width="600">
 </picture>
 </a>
 </p>
